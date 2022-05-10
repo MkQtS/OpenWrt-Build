@@ -45,7 +45,6 @@ jobs:
         cd $OPENWRT_ROOT_PATH
         mkdir -p ./files/www/luci-static/argon/background
         cd ./files/www/luci-static/argon/background
-        wget -q https://w.wallhaven.cc/full/0j/wallhaven-0joz5n.jpg
         wget -q https://w.wallhaven.cc/full/4g/wallhaven-4gr9d0.jpg
         wget -q https://w.wallhaven.cc/full/gj/wallhaven-gjly83.jpg
 
@@ -55,7 +54,8 @@ jobs:
       run: |
         cd $OPENWRT_ROOT_PATH
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/$BUILD_DATE@%D %V %C/g" package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/ImmortalWrt 21.02 built on $BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        sed -i '2a\uci set luci.main.lang=zh_cn\nuci commit luci\n' package/emortal/default-settings/files/99-default-settings-chinese
         wget -O .config $CONFIG_FILE
         make defconfig
         cp ./.config ../referer/immortalwrt_config.txt

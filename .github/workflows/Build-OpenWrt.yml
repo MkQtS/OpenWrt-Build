@@ -46,7 +46,8 @@ jobs:
       run: |
         cd $OPENWRT_ROOT_PATH
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        curl -s $CONFIG_FILE | sed "s/VAR_BUILD_DATE/$BUILD_DATE/" > .config
+        sed -i "s/%D %V %C/OpenWrt 22.03 built on $BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        wget -O .config $CONFIG_FILE
         make defconfig
         cp ./.config ../referer/openwrt_config.txt
         sh ./scripts/diffconfig.sh > ../referer/diff_openwrt_config.txt
