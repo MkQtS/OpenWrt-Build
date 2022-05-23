@@ -9,7 +9,7 @@ jobs:
 
     env: 
       SOURCE_PROJECT: https://github.com/immortalwrt/immortalwrt
-      SOURCE_BRANCH: master
+      SOURCE_BRANCH: openwrt-21.02
       OPENWRT_ROOT_PATH: immortalwrt
 
     steps:
@@ -20,7 +20,6 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo -E ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
         sudo -E apt-get -qq install ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential \
@@ -33,20 +32,14 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
 
-    - name: Clone source code & Install feeds
+    - name: Clone source & Install feeds
       run: |
         git clone -b $SOURCE_BRANCH --depth 1 $SOURCE_PROJECT
         cd $OPENWRT_ROOT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Customize files
-      run: |
-        cd $OPENWRT_ROOT_PATH/feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img
-        rm ./bg1.jpg
-        wget -q -O bg1.jpg https://w.wallhaven.cc/full/dp/wallhaven-dpepjo.jpg
-
-    - name: Customize config
+    - name: Customize
       env:
         CONFIG_FILE: https://raw.githubusercontent.com/MkQtS/OpenWrt-build/main/immortalwrt_config.txt
       run: |
@@ -56,12 +49,26 @@ jobs:
         sed -i '2a\uci set luci.main.lang=zh_cn\nuci commit luci\n' package/emortal/default-settings/files/99-default-settings-chinese
         wget -q -O .config $CONFIG_FILE
         make defconfig
-        cat ./.config > ../referer/immortalwrt_master_config.txt
-        sh ./scripts/diffconfig.sh > ../referer/diff_immortalwrt_master_config.txt
+        cd ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img
+        rm ./bg1.jpg
+        wget -q -O bg1.jpg https://w.wallhaven.cc/full/dp/wallhaven-dpepjo.jpg
+
+    - name: Commit referer files
+      run: |
+        cd $OPENWRT_ROOT_PATH
+        cat ./.config > ../referer/immortalwrt_config.txt
+        sh ./scripts/diffconfig.sh > ../referer/diff_immortalwrt_config.txt
+        cd ..
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add ./referer/immortalwrt_config.txt ./referer/diff_immortalwrt_config.txt
+        git commit --allow-empty -m "upload referer files"
+        git push origin main
 
     - name: Build firmware
       run: |
         cd $OPENWRT_ROOT_PATH
+        echo -e "$(nproc) thread compile"
         make -j $(nproc) download world
 
     - name : Upload ext4-efi.img to artifact
@@ -84,12 +91,4 @@ jobs:
     #    name: ${{ env.OPENWRT_ROOT_PATH }}
     #    path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64
     #    retention-days: 3
-
-    - name: Commit referer files
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add ./referer/immortalwrt_master_config.txt ./referer/diff_immortalwrt_master_config.txt
-        git commit --allow-empty -m "upload referer files"
-        git push origin main
 
