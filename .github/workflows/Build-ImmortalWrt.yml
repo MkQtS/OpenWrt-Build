@@ -78,12 +78,12 @@ jobs:
         path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64/*-ext4-combined-efi.img.gz
         retention-days: 3
 
-    #- name : Upload squashfs-efi.img to artifact
-    #  uses: actions/upload-artifact@v3
-    #  with:
-    #    name: squashfs-combined
-    #    path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
-    #    retention-days: 3
+    - name : Upload squashfs-efi.img to artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: squashfs-combined
+        path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
+        retention-days: 3
 
     #- name : Upload all to artifact
     #  uses: actions/upload-artifact@v3
