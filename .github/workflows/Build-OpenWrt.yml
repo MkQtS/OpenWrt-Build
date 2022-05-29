@@ -1,13 +1,13 @@
 name: Build OpenWrt
 
-on: 
+on:
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    env: 
+    env:
       SOURCE_PROJECT: https://github.com/openwrt/openwrt
       SOURCE_BRANCH: openwrt-22.03
       OPENWRT_ROOT_PATH: openwrt

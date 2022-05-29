@@ -1,4 +1,4 @@
-name: Build ImmortalWrt
+name: Build ImmortalWrt-master
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ jobs:
 
     env:
       SOURCE_PROJECT: https://github.com/immortalwrt/immortalwrt
-      SOURCE_BRANCH: openwrt-21.02
+      SOURCE_BRANCH: master
       OPENWRT_ROOT_PATH: immortalwrt
 
     steps:
@@ -45,7 +45,7 @@ jobs:
       run: |
         cd $OPENWRT_ROOT_PATH
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/ImmortalWrt master @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         sed -i '2a\uci set luci.main.lang=zh_cn\nuci commit luci\n' package/emortal/default-settings/files/99-default-settings-chinese
         wget -q -O .config $CONFIG_FILE
         make defconfig
@@ -56,12 +56,12 @@ jobs:
     - name: Commit referer files
       run: |
         cd $OPENWRT_ROOT_PATH
-        cat ./.config > ../referer/immortalwrt_config.txt
-        sh ./scripts/diffconfig.sh > ../referer/diff_immortalwrt_config.txt
+        cat ./.config > ../referer/immortalwrt_master_config.txt
+        sh ./scripts/diffconfig.sh > ../referer/diff_immortalwrt_master_config.txt
         cd ..
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./referer/immortalwrt_config.txt ./referer/diff_immortalwrt_config.txt
+        git add ./referer/immortalwrt_master_config.txt ./referer/diff_immortalwrt_master_config.txt
         git commit --allow-empty -m "upload referer files"
         git push origin main
 
