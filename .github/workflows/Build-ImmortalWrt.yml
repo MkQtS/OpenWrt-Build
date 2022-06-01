@@ -40,14 +40,12 @@ jobs:
         ./scripts/feeds install -a
 
     - name: Customize
-      env:
-        CONFIG_FILE: https://raw.githubusercontent.com/MkQtS/OpenWrt-build/main/immortalwrt_config.txt
       run: |
         cd $OPENWRT_ROOT_PATH
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         sed -i '2a\uci set luci.main.lang=zh_cn\nuci commit luci\n' package/emortal/default-settings/files/99-default-settings-chinese
-        wget -q -O .config $CONFIG_FILE
+        cp ../immortalwrt_config.txt ./.config
         make defconfig
         cd ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img
         rm ./bg1.jpg
@@ -65,25 +63,25 @@ jobs:
         git commit --allow-empty -m "upload referer files"
         git push origin main
 
-    - name: Build firmware
-      run: |
-        cd $OPENWRT_ROOT_PATH
-        echo -e "$(nproc) thread compile"
-        make -j $(nproc) download world
+    #- name: Build firmware
+    #  run: |
+    #    cd $OPENWRT_ROOT_PATH
+    #    echo -e "$(nproc) thread compile"
+    #    make -j $(nproc) download world
 
-    - name : Upload ext4-efi.img to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ext4-combined
-        path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64/*-ext4-combined-efi.img.gz
-        retention-days: 3
+    #- name : Upload ext4-efi.img to artifact
+    #  uses: actions/upload-artifact@v3
+    #  with:
+    #    name: ext4-combined
+    #    path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64/*-ext4-combined-efi.img.gz
+    #    retention-days: 3
 
-    - name : Upload squashfs-efi.img to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: squashfs-combined
-        path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
-        retention-days: 3
+    #- name : Upload squashfs-efi.img to artifact
+    #  uses: actions/upload-artifact@v3
+    #  with:
+    #    name: squashfs-combined
+    #    path: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
+    #    retention-days: 3
 
     #- name : Upload all to artifact
     #  uses: actions/upload-artifact@v3
