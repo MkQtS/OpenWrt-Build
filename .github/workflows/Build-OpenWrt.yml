@@ -22,7 +22,7 @@ jobs:
         sudo -E apt -y clean
         sudo -E rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt -y update
-        sudo -E apt -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev 
+        sudo -E apt -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev
         sudo -E apt -y clean
 
     - name: Checkout
@@ -36,25 +36,23 @@ jobs:
         path: 'openwrt'
 
     - name: Install & Update feeds
+      working-directory: ./openwrt
       run: |
-        cd openwrt
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
     - name: Customize
+      working-directory: ./openwrt
       run: |
-        cd openwrt
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/OpenWrt 22.03 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         cp ../configs/openwrt_config.txt ./.config
         make defconfig
+        cat ./.config > ../configs/all_openwrt_config.txt
+        sh ./scripts/diffconfig.sh > ../configs/diff_openwrt_config.txt
 
     - name: Commit config files
       run: |
-        cd openwrt
-        cat ./.config > ../configs/all_openwrt_config.txt
-        sh ./scripts/diffconfig.sh > ../configs/diff_openwrt_config.txt
-        cd ..
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add ./configs/all_openwrt_config.txt ./configs/diff_openwrt_config.txt
@@ -62,10 +60,10 @@ jobs:
         git push origin main
 
     - name: Build firmware
+      working-directory: ./openwrt
       run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j $(nproc) download world
+        echo -e "$(($(nproc)+1)) thread compile"
+        make -j $(($(nproc)+1)) download world
 
     - name : Upload firmware to artifact
       uses: actions/upload-artifact@v3
