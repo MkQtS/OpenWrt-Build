@@ -1,10 +1,12 @@
-name: Build ImmortalWrt
+name: Build X86-64
 
 on:
   workflow_dispatch:
 
 env:
+  SOURCE_PROJECT: immortalwrt/immortalwrt
   SOURCE_BRANCH: openwrt-21.02
+  VERSION_TAG: ImmortalWrt 21.02
 
 jobs:
   build:
@@ -17,7 +19,6 @@ jobs:
       run: |
         sudo -E swapoff -a
         sudo -E rm -f /swapfile
-        sudo -E docker image prune -a -f
         sudo -E apt -y autoremove --purge
         sudo -E apt -y clean
         sudo -E rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
@@ -31,11 +32,11 @@ jobs:
     - name: Get source code
       uses: actions/checkout@v3
       with:
-        repository: immortalwrt/immortalwrt
+        repository: ${{ env.SOURCE_PROJECT }}
         ref: ${{ env.SOURCE_BRANCH }}
         path: 'openwrt'
 
-    - name: Install & Update feeds
+    - name: Update & Install feeds
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
@@ -45,27 +46,42 @@ jobs:
       working-directory: ./openwrt
       run: |
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         cp ../custom/zju_localize ./package/base-files/files/etc/uci-defaults/
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-        wget -q -O ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg https://w.wallhaven.cc/full/dp/wallhaven-dpepjo.jpg
-        cp ../configs/immortalwrt_config.txt ./.config
+        cp ../custom/wallhaven-dpepjo.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+        cp ../configs/X64_config.txt ./.config
         make defconfig
-        cat ./.config > ../configs/all_immortalwrt_config.txt
-        sh ./scripts/diffconfig.sh > ../configs/diff_immortalwrt_config.txt
+        cp ./.config ../configs/new_all_X64_config.txt
+        sh ./scripts/diffconfig.sh > ../configs/new_diff_X64_config.txt
+
+    - name: Diff config
+      id: diff_config
+      working-directory: ./configs
+      run: |
+        if [ "$(diff -q new_all_X64_config.txt all_X64_config.txt)" != "" ]
+        then
+          echo "::set-output name=state::changed"
+          rm -f all_X64_config.txt diff_X64_config.txt
+          mv new_all_X64_config.txt all_X64_config.txt
+          mv new_diff_X64_config.txt diff_X64_config.txt
+        else
+          echo "Configs have not changed."
+        fi
 
     - name: Commit config files
+      if: steps.diff_config.outputs.state == 'changed'
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./configs/all_immortalwrt_config.txt ./configs/diff_immortalwrt_config.txt
-        git commit --allow-empty -m "Upload config files"
+        git add ./configs/all_X64_config.txt ./configs/diff_X64_config.txt
+        git commit -m "Update config files"
         git push origin main
 
     - name: Build firmware
       working-directory: ./openwrt
       run: |
-        echo -e "$(($(nproc)+1)) thread compile"
+        echo -e "Using $(($(nproc)+1)) threads to compile."
         make -j $(($(nproc)+1)) download world
 
     - name : Upload ext4-efi.img to artifact
@@ -85,7 +101,7 @@ jobs:
     #- name : Upload all to artifact
     #  uses: actions/upload-artifact@v3
     #  with:
-    #    name: openwrt
+    #    name: X64_openwrt
     #    path: openwrt/bin/targets/x86/64
     #    retention-days: 3
 
