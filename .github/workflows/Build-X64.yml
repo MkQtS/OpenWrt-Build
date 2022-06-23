@@ -37,6 +37,7 @@ jobs:
         path: 'openwrt'
 
     - name: Download build_cache from releases
+      continue-on-error: true
       working-directory: ./openwrt
       run: |
         curl -fsL https://github.com/$GITHUB_REPOSITORY/releases/download/X64-latest/build_cache.tar > build_cache.tar
@@ -45,7 +46,6 @@ jobs:
         rm -f ./build_cache.tar && rm -rf ./build_cache/
 
     - name: Update & Install feeds
-      continue-on-error: true
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
