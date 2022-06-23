@@ -23,7 +23,7 @@ jobs:
         sudo -E apt -y clean
         sudo -E rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt -y update
-        sudo -E apt -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev
+        sudo -E apt -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev
         sudo -E apt -y clean
 
     - name: Checkout
@@ -36,7 +36,16 @@ jobs:
         ref: ${{ env.SOURCE_BRANCH }}
         path: 'openwrt'
 
+    - name: Download build_cache from releases
+      working-directory: ./openwrt
+      run: |
+        curl -fsL https://github.com/$GITHUB_REPOSITORY/releases/download/X64-latest/build_cache.tar > build_cache.tar
+        tar xjf build_cache.tar
+        mv ./build_cache/build_dir/ ./build_cache/dl/ ./build_cache/staging_dir/ -t ./
+        rm -f ./build_cache.tar && rm -rf ./build_cache/
+
     - name: Update & Install feeds
+      continue-on-error: true
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
@@ -45,9 +54,10 @@ jobs:
     - name: Customize
       working-directory: ./openwrt
       run: |
-        BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
+        echo "BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)" >> $GITHUB_ENV
         sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
-        cp ../custom/zju_localize ./package/base-files/files/etc/uci-defaults/
+        mkdir -p ./files/etc/uci-defaults/
+        cp ../custom/zju_localize ./files/etc/uci-defaults/
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ../custom/wallhaven-dpepjo.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ../configs/X64_config.txt ./.config
@@ -81,22 +91,23 @@ jobs:
     - name: Build firmware
       working-directory: ./openwrt
       run: |
+        make downlod j64
         echo -e "Using $(($(nproc)+1)) threads to compile."
-        make -j $(($(nproc)+1)) download world
+        make -j $(($(nproc)+1))
 
-    - name : Upload ext4-efi.img to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ext4-combined
-        path: openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz
-        retention-days: 3
+    #- name : Upload ext4-efi.img to artifact
+    #  uses: actions/upload-artifact@v3
+    #  with:
+    #    name: ext4-combined
+    #    path: openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz
+    #    retention-days: 3
 
-    - name : Upload squashfs-efi.img to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: squashfs-combined
-        path: openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
-        retention-days: 3
+    #- name : Upload squashfs-efi.img to artifact
+    #  uses: actions/upload-artifact@v3
+    #  with:
+    #    name: squashfs-combined
+    #    path: openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
+    #    retention-days: 3
 
     #- name : Upload all to artifact
     #  uses: actions/upload-artifact@v3
@@ -104,4 +115,34 @@ jobs:
     #    name: X64_openwrt
     #    path: openwrt/bin/targets/x86/64
     #    retention-days: 3
+
+    - name: Create new releases
+      working-directory: ./openwrt
+      run: |
+        mkdir -p ./path_releases/build_cache
+        mv ./bin/targets/x86/64/*-ext4-combined-efi.img.gz ./bin/targets/x86/64/*-squashfs-combined-efi.img.gz -t ./path_releases/
+        make clean
+        mv ./build_dir/ ./dl/ ./staging_dir/ -t ./path_releases/build_cache
+        cd ./path_releases
+        tar cjf ./build_cache.tar ./build_cache
+        rm -rf ./build_cache/
+        echo "The size of build_cache.tar: $(du -h build_cache.tar)"
+
+    - name: Delete old releases
+      uses: mknejp/delete-release-assets@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        tag: X64-latest
+        assets: |
+          *
+        fail-if-no-assets: false
+        fail-if-no-release: false
+
+    - name: Upload new releases
+      uses: softprops/action-gh-release@v1
+      with:
+          name: OpenWrt Firmware for X64
+          tag_name: X64-latest
+          body: Built at ${{ env.BUILD_DATE }}.
+          files: ./openwrt/path_releases/*
 
