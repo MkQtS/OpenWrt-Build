@@ -95,8 +95,7 @@ jobs:
       working-directory: ./openwrt
       run: |
         echo -e "Using $(($(nproc)+1)) threads to compile."
-        make downlod j $(($(nproc)+1))
-        make -j $(($(nproc)+1))
+        make -j $(($(nproc)+1)) download world
 
     #- name : Upload ext4-efi.img to artifact
     #  uses: actions/upload-artifact@v3
