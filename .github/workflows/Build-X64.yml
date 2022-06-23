@@ -94,8 +94,8 @@ jobs:
     - name: Build firmware
       working-directory: ./openwrt
       run: |
-        make downlod j64
         echo -e "Using $(($(nproc)+1)) threads to compile."
+        make downlod j $(($(nproc)+1))
         make -j $(($(nproc)+1))
 
     #- name : Upload ext4-efi.img to artifact
