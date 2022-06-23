@@ -41,9 +41,12 @@ jobs:
       working-directory: ./openwrt
       run: |
         curl -fsL https://github.com/$GITHUB_REPOSITORY/releases/download/X64-latest/build_cache.tar > build_cache.tar
-        tar xjf build_cache.tar
-        mv ./build_cache/build_dir/ ./build_cache/dl/ ./build_cache/staging_dir/ -t ./
-        rm -f ./build_cache.tar && rm -rf ./build_cache/
+        if [-e build_cache.tar]
+        then
+          tar xjf build_cache.tar
+          mv ./build_cache/build_dir/ ./build_cache/dl/ ./build_cache/staging_dir/ -t ./
+          rm -f ./build_cache.tar && rm -rf ./build_cache/
+        fi
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -127,6 +130,10 @@ jobs:
         tar cjf ./build_cache.tar ./build_cache
         rm -rf ./build_cache/
         echo "The size of build_cache.tar: $(du -h build_cache.tar)"
+        if [ $(du -b ./build_cache.tar) -gt 2000*1000*1000 ]
+        then
+          rm -f build_cache.tar
+        fi
 
     - name: Delete old releases
       uses: mknejp/delete-release-assets@v1
