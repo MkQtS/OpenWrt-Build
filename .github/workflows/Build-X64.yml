@@ -58,7 +58,7 @@ jobs:
         #tar -xf action_cache_*.tar
         mv ./action_cache/build_dir/ ./action_cache/dl/ ./action_cache/staging_dir/ -t ./
         rm -f ./action_cache.tar && rm -rf ./action_cache/
-        echo "$ls -lh"
+        echo "$(ls -lh)"
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -147,6 +147,11 @@ jobs:
         git add ./.github/X64_action_cache
         git commit -m "Update cache mark"
         git push origin main
+
+    # It seems that GitHub's hashFiles execute before other unexecuted command.
+    # So make sure ${{ hashFiles() }} execute after commit.
+    - name: Rename cache file
+      run: |
         mv ./openwrt/action_cache.tar ./openwrt/action_cache_${{ hashFiles('./.github/X64_action_cache') }}.tar
 
     - name: Renew action Cache
