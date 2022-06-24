@@ -36,17 +36,20 @@ jobs:
         ref: ${{ env.SOURCE_BRANCH }}
         path: 'openwrt'
 
-    - name: Download build_cache from releases
-      continue-on-error: true
+    - name: Action Cache
+      id: action-chche
+      uses: actions/cache@v3
+      with:
+        path: ./openwrt/action_cache.tar
+        key: openwrt-x64-${{ hashFiles('configs/X64_config.txt') }}
+
+    - name: Restore cache files
+      if: steps.action-chche.outputs.cache-hit == 'true'
       working-directory: ./openwrt
       run: |
-        curl -fsL https://github.com/$GITHUB_REPOSITORY/releases/download/X64-latest/build_cache.tar > build_cache.tar
-        if [-e build_cache.tar]
-        then
-          tar xjf build_cache.tar
-          mv ./build_cache/build_dir/ ./build_cache/dl/ ./build_cache/staging_dir/ -t ./
-          rm -f ./build_cache.tar && rm -rf ./build_cache/
-        fi
+        tar xjf action_cache.tar
+        mv ./action_cache/build_dir/ ./action_cache/dl/ ./action_cache/staging_dir/ -t ./
+        rm -f ./action_cache.tar && rm -rf ./action_cache/
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -57,7 +60,7 @@ jobs:
     - name: Customize
       working-directory: ./openwrt
       run: |
-        echo "BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)" >> $GITHUB_ENV
+        BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         mkdir -p ./files/etc/uci-defaults/
         cp ../custom/zju_localize ./files/etc/uci-defaults/
@@ -97,19 +100,19 @@ jobs:
         echo -e "Using $(($(nproc)+1)) threads to compile."
         make -j $(($(nproc)+1)) download world
 
-    #- name : Upload ext4-efi.img to artifact
-    #  uses: actions/upload-artifact@v3
-    #  with:
-    #    name: ext4-combined
-    #    path: openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz
-    #    retention-days: 3
+    - name : Upload ext4-efi.img to artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ext4-combined
+        path: openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz
+        retention-days: 3
 
-    #- name : Upload squashfs-efi.img to artifact
-    #  uses: actions/upload-artifact@v3
-    #  with:
-    #    name: squashfs-combined
-    #    path: openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
-    #    retention-days: 3
+    - name : Upload squashfs-efi.img to artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: squashfs-combined
+        path: openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
+        retention-days: 3
 
     #- name : Upload all to artifact
     #  uses: actions/upload-artifact@v3
@@ -118,37 +121,12 @@ jobs:
     #    path: openwrt/bin/targets/x86/64
     #    retention-days: 3
 
-    - name: Create new releases
+    - name: Create cache file
       working-directory: ./openwrt
       run: |
-        mkdir -p ./path_releases/build_cache
-        mv ./bin/targets/x86/64/*-ext4-combined-efi.img.gz ./bin/targets/x86/64/*-squashfs-combined-efi.img.gz -t ./path_releases/
         make clean
-        mv ./build_dir/ ./dl/ ./staging_dir/ -t ./path_releases/build_cache
-        cd ./path_releases
-        tar cjf ./build_cache.tar ./build_cache
-        rm -rf ./build_cache/
-        echo "The size of build_cache.tar: $(du -h build_cache.tar)"
-        if [ $(du -b ./build_cache.tar) -gt 2000*1000*1000 ]
-        then
-          rm -f build_cache.tar
-        fi
-
-    - name: Delete old releases
-      uses: mknejp/delete-release-assets@v1
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        tag: X64-latest
-        assets: |
-          *
-        fail-if-no-assets: false
-        fail-if-no-release: false
-
-    - name: Upload new releases
-      uses: softprops/action-gh-release@v1
-      with:
-          name: OpenWrt Firmware for X64
-          tag_name: X64-latest
-          body: Built at ${{ env.BUILD_DATE }}.
-          files: ./openwrt/path_releases/*
+        mkdir ./action_cache
+        mv ./build_dir/ ./dl/ ./staging_dir/ -t ./action_cache
+        tar cjf ./action_cache.tar ./action_cache
+        echo "The size of action_cache.tar: $(du -h build_cache.tar)"
 
