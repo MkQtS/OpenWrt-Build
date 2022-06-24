@@ -36,20 +36,20 @@ jobs:
         ref: ${{ env.SOURCE_BRANCH }}
         path: 'openwrt'
 
-    - name: Action Cache
-      id: action-chche
-      uses: actions/cache@v3
-      with:
-        path: ./openwrt/action_cache.tar
-        key: openwrt-x64-${{ hashFiles('configs/X64_config.txt') }}
+    #- name: Action Cache
+    #  id: action-chche
+    #  uses: actions/cache@v3
+    #  with:
+    #    path: ./openwrt/action_cache.tar
+    #    key: openwrt-x64-${{ hashFiles('configs/X64_config.txt') }}
 
-    - name: Restore cache files
-      if: steps.action-chche.outputs.cache-hit == 'true'
-      working-directory: ./openwrt
-      run: |
-        tar xjf action_cache.tar
-        mv ./action_cache/build_dir/ ./action_cache/dl/ ./action_cache/staging_dir/ -t ./
-        rm -f ./action_cache.tar && rm -rf ./action_cache/
+    #- name: Restore cache files
+    #  if: steps.action-chche.outputs.cache-hit == 'true'
+    #  working-directory: ./openwrt
+    #  run: |
+    #    tar xjf action_cache.tar
+    #    mv ./action_cache/build_dir/ ./action_cache/dl/ ./action_cache/staging_dir/ -t ./
+    #    rm -f ./action_cache.tar && rm -rf ./action_cache/
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -129,4 +129,11 @@ jobs:
         mv ./build_dir/ ./dl/ ./staging_dir/ -t ./action_cache
         tar cjf ./action_cache.tar ./action_cache
         echo "The size of action_cache.tar: $(du -h build_cache.tar)"
+
+    - name: Action Cache
+      id: action-chche
+      uses: actions/cache@v3
+      with:
+        path: ./openwrt/action_cache.tar
+        key: openwrt-x64-${{ hashFiles('configs/X64_config.txt') }}
 
