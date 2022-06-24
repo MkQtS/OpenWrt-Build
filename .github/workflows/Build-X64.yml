@@ -48,8 +48,9 @@ jobs:
       working-directory: ./openwrt
       run: |
         tar -xf action_cache_*.tar
+        #tar -xzf action_cache_*.tar
         mv ./action_cache/build_dir/ ./action_cache/dl/ ./action_cache/staging_dir/ -t ./
-        rm -f ./action_cache.tar && rm -rf ./action_cache/
+        rm -f ./action_cache_*.tar && rm -rf ./action_cache/
         echo "$(ls -lha)"
 
     - name: Update & Install feeds
@@ -128,7 +129,7 @@ jobs:
         make clean
         mkdir ./action_cache
         mv ./build_dir/ ./dl/ ./staging_dir/ -t ./action_cache
-        tar -cf ./action_cache.tar ./action_cache
+        tar -czf ./action_cache.tar ./action_cache
         rm -rf ./action_cache
         echo "The size of action_cache.tar: $(du -h action_cache.tar)"
 
