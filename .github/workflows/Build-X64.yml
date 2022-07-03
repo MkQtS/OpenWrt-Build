@@ -1,6 +1,8 @@
 name: Build X86-64
 
 on:
+  schedule:
+    - cron: 0 20 * * 5
   workflow_dispatch:
 
 env:
@@ -40,18 +42,17 @@ jobs:
       id: load-chche
       uses: actions/cache@v3
       with:
-        path: ./openwrt/action_cache_${{ hashFiles('./.github/X64_action_cache') }}.tar
-        key: openwrt-x64-${{ hashFiles('./.github/X64_action_cache') }}
+        path: ./openwrt/action_cache_${{ hashFiles('./.github/X64_build_mark') }}.tar
+        key: openwrt-x64-${{ hashFiles('./.github/X64_build_mark') }}
 
     - name: Restore cache files
       if: steps.load-chche.outputs.cache-hit == 'true'
       working-directory: ./openwrt
       run: |
-        tar -xf action_cache_*.tar
-        #tar -xzf action_cache_*.tar
+        tar -xzf action_cache_*.tar
         mv ./action_cache/build_dir/ ./action_cache/dl/ ./action_cache/staging_dir/ -t ./
         rm -f ./action_cache_*.tar && rm -rf ./action_cache/
-        echo "$(ls -lha)"
+        echo "Files under openwrt directory: $(ls -lha)"
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -102,55 +103,43 @@ jobs:
         echo -e "Using $(($(nproc)+1)) threads to compile."
         make -j $(($(nproc)+1)) download world
 
-    - name : Upload ext4-efi.img to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: ext4-combined
-        path: openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz
-        retention-days: 3
+    - name: Prepare for release
+      run: |
+        echo "Last build mark: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" > ./.github/X64_build_mark
+        mkdir -p release_firmwares
+        mv ./openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz ./release_firmwares/x64-ext4-efi.img.gz
+        mv ./openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz ./release_firmwares/x64-squashfs-efi.img.gz
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add ./.github/X64_build_mark
+        git commit -m "Update build mark"
+        git push origin main
 
-    - name : Upload squashfs-efi.img to artifact
-      uses: actions/upload-artifact@v3
+    - name: Upload firmware to releases
+      uses: ncipollo/release-action@v1
       with:
-        name: squashfs-combined
-        path: openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz
-        retention-days: 3
+        name: latest x64 firmware
+        tag: latest-x64
+        artifacts: "release_firmwares/x64-ext4-efi.img.gz,release_firmwares/x64-squashfs-efi.img.gz"
+        bodyFile: ".github/X64_build_mark"
+        removeArtifacts: true
 
-    - name : Upload all to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: X64_openwrt
-        path: openwrt/bin/targets/x86/64
-        retention-days: 3
-
+    # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.
+    # So make sure hashed File changed before the step.
     - name: Create cache file
       working-directory: ./openwrt
       run: |
+        rm -rf ../release_firmwares
         make clean
         mkdir ./action_cache
         mv ./build_dir/ ./dl/ ./staging_dir/ -t ./action_cache
         tar -czf ./action_cache.tar ./action_cache
+        mv action_cache.tar action_cache_${{ hashFiles('./.github/X64_build_mark') }}.tar
         rm -rf ./action_cache
-        echo "The size of action_cache.tar: $(du -h action_cache.tar)"
-
-    - name: Commit cache mark
-      run: |
-        echo "Last cache mark: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" > ./.github/X64_action_cache
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add ./.github/X64_action_cache
-        git commit -m "Update cache mark"
-        git push origin main
-
-    # It seems that GitHub's hashFiles execute before other unexecuted command.
-    # So make sure ${{ hashFiles() }} execute after commit.
-    - name: Rename cache file
-      run: |
-        mv ./openwrt/action_cache.tar ./openwrt/action_cache_${{ hashFiles('./.github/X64_action_cache') }}.tar
 
     - name: Upload new action cache
       uses: actions/cache@v3
       with:
-        path: ./openwrt/action_cache_${{ hashFiles('./.github/X64_action_cache') }}.tar
-        key: openwrt-x64-${{ hashFiles('./.github/X64_action_cache') }}
+        path: ./openwrt/action_cache_${{ hashFiles('./.github/X64_build_mark') }}.tar
+        key: openwrt-x64-${{ hashFiles('./.github/X64_build_mark') }}
 
