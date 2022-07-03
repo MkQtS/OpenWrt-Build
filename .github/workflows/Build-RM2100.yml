@@ -1,6 +1,8 @@
 name: Build RM-AC2100
 
 on:
+  schedule:
+    - cron: 0 20 * * 6
   workflow_dispatch:
 
 env:
@@ -26,7 +28,7 @@ jobs:
         sudo -E apt -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev
         sudo -E apt -y clean
 
-    - name: Checkout
+    - name: Checkout repo
       uses: actions/checkout@v3
 
     - name: Get source code
@@ -35,6 +37,22 @@ jobs:
         repository: ${{ env.SOURCE_PROJECT }}
         ref: ${{ env.SOURCE_BRANCH }}
         path: 'openwrt'
+
+    - name: Get last action cache
+      id: load-chche
+      uses: actions/cache@v3
+      with:
+        path: ./openwrt/action_cache_${{ hashFiles('./.github/RM2100_build_mark') }}.tar
+        key: openwrt-rm2100-${{ hashFiles('./.github/RM2100_build_mark') }}
+
+    - name: Restore cache files
+      if: steps.load-chche.outputs.cache-hit == 'true'
+      working-directory: ./openwrt
+      run: |
+        tar -xzf action_cache_*.tar
+        mv ./action_cache/build_dir/ ./action_cache/dl/ ./action_cache/staging_dir/ -t ./
+        rm -f ./action_cache_*.tar && rm -rf ./action_cache/
+        echo "Files under openwrt directory: $(ls -lha)"
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -47,21 +65,21 @@ jobs:
       run: |
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
-        cp ../configs/RM2100_config.txt ./.config
+        cp ../configs/RM2100_config ./.config
         make defconfig
-        cp ./.config ../configs/new_all_RM2100_config.txt
-        sh ./scripts/diffconfig.sh > ../configs/new_diff_RM2100_config.txt
+        cp ./.config ../configs/new_all_RM2100_config
+        sh ./scripts/diffconfig.sh > ../configs/new_diff_RM2100_config
 
     - name: Diff config
       id: diff_config
       working-directory: ./configs
       run: |
-        if [ "$(diff -q new_all_RM2100_config.txt all_RM2100_config.txt)" != "" ]
+        if [ "$(diff -q new_all_RM2100_config all_RM2100_config)" != "" ]
         then
           echo "::set-output name=state::changed"
-          rm -f all_RM2100_config.txt diff_RM2100_config.txt
-          mv new_all_RM2100_config.txt all_RM2100_config.txt
-          mv new_diff_RM2100_config.txt diff_RM2100_config.txt
+          rm -f all_RM2100_config diff_RM2100_config
+          mv new_all_RM2100_config all_RM2100_config
+          mv new_diff_RM2100_config diff_RM2100_config
         else
           echo "Configs have not changed."
         fi
@@ -71,7 +89,7 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./configs/all_RM2100_config.txt ./configs/diff_RM2100_config.txt
+        git add ./configs/all_RM2100_config ./configs/diff_RM2100_config
         git commit -m "Update config files"
         git push origin main
 
@@ -81,19 +99,43 @@ jobs:
         echo -e "Using $(($(nproc)+1)) threads to compile."
         make -j $(($(nproc)+1)) download world
 
-    - name : Upload firmware to artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: firmware
-        path: |
-          openwrt/bin/targets/ramips/mt7621/*-initramfs-kernel.bin
-          openwrt/bin/targets/ramips/mt7621/*-squashfs-sysupgrade.bin
-        retention-days: 3
+    - name: Prepare for release
+      run: |
+        echo "Last build mark: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" > ./.github/RM2100_build_mark
+        mkdir -p release_firmwares
+        mv ./openwrt/bin/targets/ramips/mt7621/*-initramfs-kernel.bin ./release_firmwares/RM2100-initramfs-kernel.bin
+        mv ./openwrt/bin/targets/ramips/mt7621/*-squashfs-sysupgrade.bin ./release_firmwares/RM2100-squashfs-sysupgrade.bin
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add ./.github/RM2100_build_mark
+        git commit -m "Update build mark"
+        git push origin main
 
-    #- name : Upload all to artifact
-    #  uses: actions/upload-artifact@v3
-    #  with:
-    #    name: RM2100_openwrt
-    #    path: openwrt/bin/targets/ramips/mt7621
-    #    retention-days: 3
+    - name: Upload firmware to releases
+      uses: ncipollo/release-action@v1
+      with:
+        name: latest rm2100 firmware
+        tag: latest-rm2100
+        artifacts: "release_firmwares/RM2100-initramfs-kernel.bin,release_firmwares/RM2100-squashfs-sysupgrade.bin"
+        bodyFile: ".github/RM2100_build_mark"
+        removeArtifacts: true
+
+    # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.
+    # So make sure hashed File changed before the step.
+    - name: Create cache file
+      working-directory: ./openwrt
+      run: |
+        rm -rf ../release_firmwares
+        make clean
+        mkdir ./action_cache
+        mv ./build_dir/ ./dl/ ./staging_dir/ -t ./action_cache
+        tar -czf ./action_cache.tar ./action_cache
+        mv action_cache.tar action_cache_${{ hashFiles('./.github/RM2100_build_mark') }}.tar
+        rm -rf ./action_cache
+
+    - name: Upload new action cache
+      uses: actions/cache@v3
+      with:
+        path: ./openwrt/action_cache_${{ hashFiles('./.github/RM2100_build_mark') }}.tar
+        key: openwrt-rm2100-${{ hashFiles('./.github/RM2100_build_mark') }}
 

@@ -28,7 +28,7 @@ jobs:
         sudo -E apt -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev
         sudo -E apt -y clean
 
-    - name: Checkout
+    - name: Checkout repo
       uses: actions/checkout@v3
 
     - name: Get source code
@@ -38,7 +38,7 @@ jobs:
         ref: ${{ env.SOURCE_BRANCH }}
         path: 'openwrt'
 
-    - name: Download last action cache
+    - name: Get last action cache
       id: load-chche
       uses: actions/cache@v3
       with:
@@ -69,21 +69,21 @@ jobs:
         cp ../custom/zju_localize ./files/etc/uci-defaults/
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ../custom/wallhaven-dpepjo.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-        cp ../configs/X64_config.txt ./.config
+        cp ../configs/X64_config ./.config
         make defconfig
-        cp ./.config ../configs/new_all_X64_config.txt
-        sh ./scripts/diffconfig.sh > ../configs/new_diff_X64_config.txt
+        cp ./.config ../configs/new_all_X64_config
+        sh ./scripts/diffconfig.sh > ../configs/new_diff_X64_config
 
     - name: Diff config
       id: diff_config
       working-directory: ./configs
       run: |
-        if [ "$(diff -q new_all_X64_config.txt all_X64_config.txt)" != "" ]
+        if [ "$(diff -q new_all_X64_config all_X64_config)" != "" ]
         then
           echo "::set-output name=state::changed"
-          rm -f all_X64_config.txt diff_X64_config.txt
-          mv new_all_X64_config.txt all_X64_config.txt
-          mv new_diff_X64_config.txt diff_X64_config.txt
+          rm -f all_X64_config diff_X64_config
+          mv new_all_X64_config all_X64_config
+          mv new_diff_X64_config diff_X64_config
         else
           echo "Configs have not changed."
         fi
@@ -93,7 +93,7 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./configs/all_X64_config.txt ./configs/diff_X64_config.txt
+        git add ./configs/all_X64_config ./configs/diff_X64_config
         git commit -m "Update config files"
         git push origin main
 
