@@ -21,12 +21,12 @@ jobs:
       run: |
         sudo -E swapoff -a
         sudo -E rm -f /swapfile
-        sudo -E apt -y autoremove --purge
-        sudo -E apt -y clean
+        sudo -E apt -qy autoremove --purge
+        sudo -E apt -qy clean
         sudo -E rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        sudo -E apt -y update
-        sudo -E apt -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev
-        sudo -E apt -y clean
+        sudo -E apt -qy update
+        sudo -E apt -qy install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev
+        sudo -E apt -qy clean
 
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -39,14 +39,14 @@ jobs:
         path: 'openwrt'
 
     - name: Get last action cache
-      id: load-chche
+      id: load_chche
       uses: actions/cache@v3
       with:
         path: ./openwrt/action_cache_${{ hashFiles('./.github/X64_build_mark') }}.tar
         key: openwrt-x64-${{ hashFiles('./.github/X64_build_mark') }}
 
     - name: Restore cache files
-      if: steps.load-chche.outputs.cache-hit == 'true'
+      if: steps.load_chche.outputs.cache-hit == 'true'
       working-directory: ./openwrt
       run: |
         tar -xzf action_cache_*.tar
