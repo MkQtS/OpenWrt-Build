@@ -1650,7 +1650,9 @@ CONFIG_ZABBIX_POSTGRESQL=y
 #
 # openwisp
 #
+# CONFIG_PACKAGE_netjson-monitoring is not set
 # CONFIG_PACKAGE_openwisp-config is not set
+# CONFIG_PACKAGE_openwisp-monitoring is not set
 # end of openwisp
 
 # CONFIG_PACKAGE_atop is not set
@@ -1660,7 +1662,8 @@ CONFIG_ZABBIX_POSTGRESQL=y
 # CONFIG_PACKAGE_debootstrap is not set
 # CONFIG_PACKAGE_gkrellmd is not set
 # CONFIG_PACKAGE_gotop is not set
-# CONFIG_PACKAGE_htop is not set
+CONFIG_PACKAGE_htop=y
+CONFIG_HTOP_LMSENSORS=y
 # CONFIG_PACKAGE_ipmitool is not set
 # CONFIG_PACKAGE_monit is not set
 # CONFIG_PACKAGE_monit-nossl is not set
@@ -3343,7 +3346,8 @@ CONFIG_PACKAGE_luci-lib-fs=y
 # CONFIG_PACKAGE_libzip-mbedtls is not set
 # CONFIG_PACKAGE_libzip-nossl is not set
 # CONFIG_PACKAGE_libzip-openssl is not set
-# CONFIG_PACKAGE_libzstd is not set
+CONFIG_PACKAGE_libzstd=y
+CONFIG_ZSTD_OPTIMIZE_O3=y
 # end of Compression
 
 #
@@ -4643,7 +4647,7 @@ CONFIG_PACKAGE_luci-app-firewall=y
 # CONFIG_PACKAGE_luci-app-mwan3 is not set
 # CONFIG_PACKAGE_luci-app-mwan3helper is not set
 # CONFIG_PACKAGE_luci-app-mwol is not set
-# CONFIG_PACKAGE_luci-app-n2n_v2 is not set
+# CONFIG_PACKAGE_luci-app-n2n is not set
 # CONFIG_PACKAGE_luci-app-naiveproxy is not set
 # CONFIG_PACKAGE_luci-app-netdata is not set
 # CONFIG_PACKAGE_luci-app-nextdns is not set
@@ -4790,6 +4794,7 @@ CONFIG_UnblockNeteaseMusic_NodeJS=y
 # CONFIG_PACKAGE_luci-app-vpnbypass is not set
 CONFIG_PACKAGE_luci-app-vsftpd=m
 # CONFIG_PACKAGE_luci-app-vssr is not set
+# CONFIG_PACKAGE_luci-app-vssr_INCLUDE_Hysteria is not set
 # CONFIG_PACKAGE_luci-app-vssr_INCLUDE_Kcptun is not set
 CONFIG_PACKAGE_luci-app-vssr_INCLUDE_ShadowsocksR_Libev_Server=y
 CONFIG_PACKAGE_luci-app-vssr_INCLUDE_Trojan=y
@@ -5776,8 +5781,8 @@ CONFIG_PACKAGE_tc-tiny=y
 # CONFIG_PACKAGE_eoip is not set
 # CONFIG_PACKAGE_fastd is not set
 # CONFIG_PACKAGE_libreswan is not set
-# CONFIG_PACKAGE_n2n-edge is not set
-# CONFIG_PACKAGE_n2n-supernode is not set
+# CONFIG_PACKAGE_n2n is not set
+# CONFIG_PACKAGE_n2n-utils is not set
 # CONFIG_PACKAGE_ocserv is not set
 # CONFIG_PACKAGE_openconnect is not set
 # CONFIG_PACKAGE_openfortivpn is not set
@@ -6315,7 +6320,7 @@ CONFIG_PACKAGE_unzip=y
 # CONFIG_PACKAGE_zipcmp is not set
 # CONFIG_PACKAGE_zipmerge is not set
 # CONFIG_PACKAGE_ziptool is not set
-# CONFIG_PACKAGE_zstd is not set
+CONFIG_PACKAGE_zstd=y
 # end of Compression
 
 #
@@ -6870,7 +6875,7 @@ CONFIG_PACKAGE_lm-sensors=y
 # CONFIG_PACKAGE_look is not set
 # CONFIG_PACKAGE_losetup is not set
 # CONFIG_PACKAGE_lrzsz is not set
-# CONFIG_PACKAGE_lscpu is not set
+CONFIG_PACKAGE_lscpu=y
 # CONFIG_PACKAGE_lsof is not set
 # CONFIG_PACKAGE_lxc is not set
 # CONFIG_PACKAGE_maccalc is not set
