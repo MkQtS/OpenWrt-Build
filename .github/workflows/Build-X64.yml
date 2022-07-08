@@ -71,31 +71,8 @@ jobs:
         cp ../custom/wallhaven-dpepjo.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ../configs/X64_config ./.config
         make defconfig
-        cp ./.config ../configs/new_all_X64_config
-        sh ./scripts/diffconfig.sh > ../configs/new_diff_X64_config
-
-    - name: Diff config
-      id: diff_config
-      working-directory: ./configs
-      run: |
-        if [ "$(diff -q new_all_X64_config all_X64_config)" != "" ]
-        then
-          echo "::set-output name=state::changed"
-          rm -f all_X64_config diff_X64_config
-          mv new_all_X64_config all_X64_config
-          mv new_diff_X64_config diff_X64_config
-        else
-          echo "Configs have not changed."
-        fi
-
-    - name: Commit config files
-      if: steps.diff_config.outputs.state == 'changed'
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add ./configs/all_X64_config ./configs/diff_X64_config
-        git commit -m "Update config files"
-        git push origin main
+        cat ./.config > ../configs/all_X64_config
+        sh ./scripts/diffconfig.sh > ../configs/diff_X64_config
 
     - name: Build firmware
       working-directory: ./openwrt
@@ -109,10 +86,13 @@ jobs:
         mkdir -p release_firmwares
         mv ./openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz ./release_firmwares/x64-ext4-efi.img.gz
         mv ./openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz ./release_firmwares/x64-squashfs-efi.img.gz
+
+    - name: Commit
+      run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./.github/X64_build_mark
-        git commit -m "Update build mark"
+        git add ./.github/X64_build_mark ./configs/all_X64_config ./configs/diff_X64_config
+        git commit -m "Auto update"
         git push origin main
 
     - name: Upload firmware to releases

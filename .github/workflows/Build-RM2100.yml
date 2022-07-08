@@ -67,31 +67,8 @@ jobs:
         sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         cp ../configs/RM2100_config ./.config
         make defconfig
-        cp ./.config ../configs/new_all_RM2100_config
-        sh ./scripts/diffconfig.sh > ../configs/new_diff_RM2100_config
-
-    - name: Diff config
-      id: diff_config
-      working-directory: ./configs
-      run: |
-        if [ "$(diff -q new_all_RM2100_config all_RM2100_config)" != "" ]
-        then
-          echo "::set-output name=state::changed"
-          rm -f all_RM2100_config diff_RM2100_config
-          mv new_all_RM2100_config all_RM2100_config
-          mv new_diff_RM2100_config diff_RM2100_config
-        else
-          echo "Configs have not changed."
-        fi
-
-    - name: Commit config files
-      if: steps.diff_config.outputs.state == 'changed'
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add ./configs/all_RM2100_config ./configs/diff_RM2100_config
-        git commit -m "Update config files"
-        git push origin main
+        cat ./.config > ../configs/all_RM2100_config
+        sh ./scripts/diffconfig.sh > ../configs/diff_RM2100_config
 
     - name: Build firmware
       working-directory: ./openwrt
@@ -105,10 +82,13 @@ jobs:
         mkdir -p release_firmwares
         mv ./openwrt/bin/targets/ramips/mt7621/*-initramfs-kernel.bin ./release_firmwares/RM2100-initramfs-kernel.bin
         mv ./openwrt/bin/targets/ramips/mt7621/*-squashfs-sysupgrade.bin ./release_firmwares/RM2100-squashfs-sysupgrade.bin
+
+    - name: Commit
+      run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./.github/RM2100_build_mark
-        git commit -m "Update build mark"
+        git add ./.github/RM2100_build_mark ./configs/all_RM2100_config ./configs/diff_RM2100_config
+        git commit -m "Auto update"
         git push origin main
 
     - name: Upload firmware to releases
