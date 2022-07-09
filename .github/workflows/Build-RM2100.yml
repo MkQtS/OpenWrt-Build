@@ -91,6 +91,14 @@ jobs:
         git commit -m "Auto update"
         git push origin main
 
+    - name: Delete old release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      with:
+        delete_release: true
+        tag_name: latest-rm2100
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Upload firmware to releases
       uses: ncipollo/release-action@v1.10.0
       with:
@@ -98,8 +106,6 @@ jobs:
         tag: latest-rm2100
         artifacts: "release_firmwares/RM2100-initramfs-kernel.bin,release_firmwares/RM2100-squashfs-sysupgrade.bin"
         bodyFile: ".github/RM2100_build_mark"
-        allowUpdates: true
-        replacesArtifacts: true
 
     # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.
     # So make sure hashed File changed before the step.

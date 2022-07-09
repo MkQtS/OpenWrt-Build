@@ -95,6 +95,14 @@ jobs:
         git commit -m "Auto update"
         git push origin main
 
+    - name: Delete old release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      with:
+        delete_release: true
+        tag_name: latest-x64
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Upload firmware to releases
       uses: ncipollo/release-action@v1.10.0
       with:
@@ -102,8 +110,6 @@ jobs:
         tag: latest-x64
         artifacts: "release_firmwares/x64-ext4-efi.img.gz,release_firmwares/x64-squashfs-efi.img.gz"
         bodyFile: ".github/X64_build_mark"
-        allowUpdates: true
-        replacesArtifacts: true
 
     # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.
     # So make sure hashed File changed before the step.
