@@ -96,13 +96,14 @@ jobs:
         git push origin main
 
     - name: Upload firmware to releases
-      uses: ncipollo/release-action@v1
+      uses: ncipollo/release-action@v1.10.0
       with:
         name: latest x64 firmware
         tag: latest-x64
         artifacts: "release_firmwares/x64-ext4-efi.img.gz,release_firmwares/x64-squashfs-efi.img.gz"
         bodyFile: ".github/X64_build_mark"
-        removeArtifacts: true
+        allowUpdates: true
+        replacesArtifacts: true
 
     # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.
     # So make sure hashed File changed before the step.

@@ -92,13 +92,14 @@ jobs:
         git push origin main
 
     - name: Upload firmware to releases
-      uses: ncipollo/release-action@v1
+      uses: ncipollo/release-action@v1.10.0
       with:
         name: latest rm2100 firmware
         tag: latest-rm2100
         artifacts: "release_firmwares/RM2100-initramfs-kernel.bin,release_firmwares/RM2100-squashfs-sysupgrade.bin"
         bodyFile: ".github/RM2100_build_mark"
-        removeArtifacts: true
+        allowUpdates: true
+        replacesArtifacts: true
 
     # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.
     # So make sure hashed File changed before the step.
