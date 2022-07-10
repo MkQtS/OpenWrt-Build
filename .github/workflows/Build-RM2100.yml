@@ -2,7 +2,7 @@ name: Build RM-AC2100
 
 on:
   schedule:
-    - cron: 0 20 * * 4
+    - cron: 0 0 * * 1,4
   workflow_dispatch:
 
 env:
@@ -21,9 +21,6 @@ jobs:
       run: |
         sudo -E swapoff -a
         sudo -E rm -f /swapfile
-        sudo -E apt -qy autoremove --purge
-        sudo -E apt -qy clean
-        sudo -E rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt -qy update
         sudo -E apt -qy install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev
         sudo -E apt -qy clean
@@ -76,15 +73,9 @@ jobs:
         echo -e "Using $(($(nproc)+1)) threads to compile."
         make -j $(($(nproc)+1)) download world
 
-    - name: Prepare for release
-      run: |
-        echo "Last build mark: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" > ./.github/RM2100_build_mark
-        mkdir -p release_firmwares
-        mv ./openwrt/bin/targets/ramips/mt7621/*-initramfs-kernel.bin ./release_firmwares/RM2100-initramfs-kernel.bin
-        mv ./openwrt/bin/targets/ramips/mt7621/*-squashfs-sysupgrade.bin ./release_firmwares/RM2100-squashfs-sysupgrade.bin
-
     - name: Commit
       run: |
+        echo "Firmwares built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" > ./.github/RM2100_build_mark
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add ./.github/RM2100_build_mark ./configs/all_RM2100_config ./configs/diff_RM2100_config
@@ -104,7 +95,7 @@ jobs:
       with:
         name: latest rm2100 firmware
         tag: latest-rm2100
-        artifacts: "release_firmwares/RM2100-initramfs-kernel.bin,release_firmwares/RM2100-squashfs-sysupgrade.bin"
+        artifacts: openwrt/bin/targets/ramips/mt7621/*
         bodyFile: ".github/RM2100_build_mark"
 
     # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.

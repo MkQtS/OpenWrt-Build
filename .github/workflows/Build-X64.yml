@@ -2,7 +2,7 @@ name: Build X86-64
 
 on:
   schedule:
-    - cron: 0 20 * * 5
+    - cron: 0 0 * * 2,5
   workflow_dispatch:
 
 env:
@@ -21,9 +21,6 @@ jobs:
       run: |
         sudo -E swapoff -a
         sudo -E rm -f /swapfile
-        sudo -E apt -qy autoremove --purge
-        sudo -E apt -qy clean
-        sudo -E rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt -qy update
         sudo -E apt -qy install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev
         sudo -E apt -qy clean
@@ -80,15 +77,9 @@ jobs:
         echo -e "Using $(($(nproc)+1)) threads to compile."
         make -j $(($(nproc)+1)) download world
 
-    - name: Prepare for release
-      run: |
-        echo "Last build mark: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" > ./.github/X64_build_mark
-        mkdir -p release_firmwares
-        mv ./openwrt/bin/targets/x86/64/*-ext4-combined-efi.img.gz ./release_firmwares/x64-ext4-efi.img.gz
-        mv ./openwrt/bin/targets/x86/64/*-squashfs-combined-efi.img.gz ./release_firmwares/x64-squashfs-efi.img.gz
-
     - name: Commit
       run: |
+        echo "Firmwares built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" > ./.github/X64_build_mark
         git config user.name github-actions
         git config user.email github-actions@github.com
         git add ./.github/X64_build_mark ./configs/all_X64_config ./configs/diff_X64_config
@@ -108,7 +99,7 @@ jobs:
       with:
         name: latest x64 firmware
         tag: latest-x64
-        artifacts: "release_firmwares/x64-ext4-efi.img.gz,release_firmwares/x64-squashfs-efi.img.gz"
+        artifacts: openwrt/bin/targets/x86/64/*
         bodyFile: ".github/X64_build_mark"
 
     # It seems that GitHub's ${{ hashFiles }} execute before commands in the same step execute.
