@@ -102,7 +102,7 @@ jobs:
         mkdir release_path cache_path
         cd ./openwrt
         rm -rf ./bin/targets/ramips/mt7621/packages/
-        mv /bin/targets/ramips/mt7621/* ../release_path
+        mv ./bin/targets/ramips/mt7621/* ../release_path
         make clean
         mv ./build_dir/ ./dl/ ./staging_dir/ -t ../cache_path
         cd ..
