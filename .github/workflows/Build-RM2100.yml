@@ -109,7 +109,7 @@ jobs:
         tar --zstd -cf ./zzz_cache.tar.zst ./cache_path
         rm -rf ./cache_path
         split -b 1920M -d zzz_cache.tar.zst zzz_cache.tar.zst_part_
-        mv zzz_cache.tar.zst_part_* ../release_path
+        mv zzz_cache.tar.zst_part_* ./release_path
         rm -f zzz_cache.tar.zst
 
     - name: Delete old release
