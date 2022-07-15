@@ -64,7 +64,7 @@ jobs:
         sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         cp ../configs/RM2100_config ./.config
         make defconfig
-        cp ./.config > ../configs/new_all_RM2100_config
+        cp ./.config ../configs/new_all_RM2100_config
         sh ./scripts/diffconfig.sh > ../configs/new_diff_RM2100_config
 
     - name: Diff config
