@@ -2,28 +2,28 @@ name: Build X86-64
 
 on:
   schedule:
-    - cron: 0 0 * * 2,5
+    - cron: 0 0 * * 5
   workflow_dispatch:
-
-env:
-  SOURCE_PROJECT: immortalwrt/immortalwrt
-  SOURCE_BRANCH: openwrt-21.02
-  VERSION_TAG: ImmortalWrt 21.02
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    env:
+      SOURCE_PROJECT: immortalwrt/immortalwrt
+      SOURCE_BRANCH: openwrt-21.02
+      VERSION_TAG: ImmortalWrt 21.02
 
     steps:
     - name: Initialize environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo -E swapoff -a
-        sudo -E rm -f /swapfile
-        sudo -E apt -qy update
-        sudo -E apt -qy install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
-        sudo -E apt -qy clean
+        sudo swapoff -a
+        sudo rm -f /swapfile
+        sudo apt -yq update
+        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
+        sudo apt -yq clean
 
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -35,22 +35,6 @@ jobs:
         ref: ${{ env.SOURCE_BRANCH }}
         path: 'openwrt'
 
-    #- name: Download last build cache
-    #  uses: robinraju/release-downloader@v1.4
-    #  with:
-    #    repository: ${{ github.repository }}
-    #    tag: "latest-x64"
-    #    fileName: "zzz_cache.tar.zst_part_*"
-
-    #- name: Restore cache files
-    #  run: |
-    #    cat zzz_cache.tar.zst_part_* > zzz_cache.tar.zst
-    #    rm -f zzz_cache.tar.zst_part_*
-    #    tar --zstd -xf zzz_cache.tar.zst
-    #    mv ./cache_path/build_dir/ ./cache_path/dl/ ./cache_path/staging_dir/ -t ./openwrt/
-    #    rm -f ./zzz_cache.tar.zst && rm -rf ./cache_path
-    #    echo "Files under openwrt directory: $(ls -lha ./openwrt)"
-
     - name: Update & Install feeds
       working-directory: ./openwrt
       run: |
@@ -60,6 +44,7 @@ jobs:
     - name: Customize
       working-directory: ./openwrt
       run: |
+        sed -i 's/192\.168\.1\.1/192\.168\.6\.1/g' ./package/base-files/files/bin/config_generate
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         mkdir -p ./files/etc/uci-defaults/
@@ -97,24 +82,17 @@ jobs:
     - name: Build firmware
       working-directory: ./openwrt
       run: |
-        echo -e "Using $(($(nproc)+1)) threads to compile."
+        echo -e "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
 
     - name: Prepare for release
       run: |
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
-        mkdir release_path cache_path
-        cd ./openwrt
-        rm -rf ./bin/targets/x86/64/packages/
-        mv ./bin/targets/x86/64/* ../release_path
-        make clean
-        mv ./build_dir/ ./dl/ ./staging_dir/ -t ../cache_path
-        cd ..
-        tar --zstd -cf ./zzz_cache.tar.zst ./cache_path
-        rm -rf ./cache_path
-        split -b 1920M -d zzz_cache.tar.zst zzz_cache.tar.zst_part_
-        mv zzz_cache.tar.zst_part_* ./release_path
-        rm -f zzz_cache.tar.zst
+        mkdir release_path
+        tar --zstd -cf ./release_path/packages.tar.zst ./openwrt/bin/targets/x86/64/packages
+        rm -rf ./openwrt/bin/targets/x86/64/packages
+        mv ./openwrt/bin/targets/x86/64/* ./release_path
+        rm -rf ./openwrt
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0

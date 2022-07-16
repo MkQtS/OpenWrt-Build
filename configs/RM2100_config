@@ -3,11 +3,9 @@ CONFIG_TARGET_ramips_mt7621=y
 CONFIG_TARGET_ramips_mt7621_DEVICE_xiaomi_redmi-router-ac2100=y
 
 CONFIG_PACKAGE_curl=y
-CONFIG_PACKAGE_firewall=y
 CONFIG_PACKAGE_lscpu=y
-CONFIG_PACKAGE_openssl-util=y
-#CONFIG_PACKAGE_wpad-basic-wolfssl=n
-#CONFIG_PACKAGE_wpad-wolfssl=y
+CONFIG_PACKAGE_wpad-basic-wolfssl=n
+CONFIG_PACKAGE_wpad-wolfssl=y
 CONFIG_PACKAGE_wget-ssl=y
 CONFIG_PACKAGE_xl2tpd=y
 
@@ -15,7 +13,7 @@ CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_LUCI_LANG_en=y
 
 CONFIG_PACKAGE_luci=y
-CONFIG_PACKAGE_luci-ssl-openssl=y
+CONFIG_PACKAGE_luci-ssl=y
 CONFIG_PACKAGE_luci-app-opkg=y
 CONFIG_PACKAGE_luci-app-sqm=y
 CONFIG_PACKAGE_luci-app-watchcat=y
