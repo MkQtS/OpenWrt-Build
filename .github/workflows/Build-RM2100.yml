@@ -106,11 +106,11 @@ jobs:
         artifacts: release_path/*
         body: ${{ env.RELEASE_BODY }}
 
-      - name: Delete workflow runs
-        uses: Mattraks/delete-workflow-runs@v2
-        with:
-          token: ${{ github.token }}
-          repository: ${{ github.repository }}
-          retain_days: 15
-          keep_minimum_runs: 1
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+        token: ${{ github.token }}
+        repository: ${{ github.repository }}
+        retain_days: 15
+        keep_minimum_runs: 1
 
