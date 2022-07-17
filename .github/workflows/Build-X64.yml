@@ -22,7 +22,7 @@ jobs:
         sudo swapoff -a
         sudo rm -f /swapfile
         sudo apt -yq update
-        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
+        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev
         sudo apt -yq clean
 
     - name: Checkout repo
@@ -89,10 +89,10 @@ jobs:
       run: |
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
         mkdir release_path
-        tar --zstd -cf ./release_path/packages.tar.zst ./openwrt/bin/targets/x86/64/packages
-        rm -rf ./openwrt/bin/targets/x86/64/packages
         mv ./openwrt/bin/targets/x86/64/* ./release_path
-        rm -rf ./openwrt
+        cd ./release_path
+        tar -czf packages.tgz ./packages
+        rm -rf ../openwrt ./packages
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
@@ -109,4 +109,12 @@ jobs:
         tag: latest-x64
         artifacts: release_path/*
         body: ${{ env.RELEASE_BODY }}
+
+      - name: Delete workflow runs
+        uses: Mattraks/delete-workflow-runs@v2
+        with:
+          token: ${{ github.token }}
+          repository: ${{ github.repository }}
+          retain_days: 15
+          keep_minimum_runs: 1
 
