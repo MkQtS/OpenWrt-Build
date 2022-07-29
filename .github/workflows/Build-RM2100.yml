@@ -40,14 +40,14 @@ jobs:
       working-directory: ./openwrt
       run: |
         # Localize
-        sed -i -e 's/192\.168\.1\.1/192\.168\.9\.1/g' -e 's/UTC/Asia\/Shanghai/g' -e 's/0\.openwrt\.pool\.ntp\.org/ntp\.tencent\.com/' -e 's/1\.openwrt\.pool\.ntp\.org/ntp\.aliyun\.com/' \
+        sed -i -e 's/192\.168\.1\.1/192\.168\.9\.1/g' -e 's/0\.openwrt\.pool\.ntp\.org/ntp\.tencent\.com/' -e 's/1\.openwrt\.pool\.ntp\.org/ntp\.aliyun\.com/' \
         -e 's/2\.openwrt\.pool\.ntp\.org/ntp\.ntsc\.ac\.cn/' -e '/3\.openwrt\.pool\.ntp\.org/d' ./package/base-files/files/bin/config_generate
         # Use aliyun mirror
         sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
         wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
         zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
-        sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         rm -f Packages.gz
+        sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         # Add build date to release name
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/OpenWrt 22.03 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
