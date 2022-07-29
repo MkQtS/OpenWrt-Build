@@ -9,11 +9,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    env:
-      SOURCE_PROJECT: openwrt/openwrt
-      SOURCE_BRANCH: openwrt-22.03
-      VERSION_TAG: OpenWrt 22.03
-
     steps:
     - name: Initialize environment
       env:
@@ -31,8 +26,8 @@ jobs:
     - name: Get source code
       uses: actions/checkout@v3
       with:
-        repository: ${{ env.SOURCE_PROJECT }}
-        ref: ${{ env.SOURCE_BRANCH }}
+        repository: openwrt/openwrt
+        ref: openwrt-22.03
         path: 'openwrt'
 
     - name: Update & Install feeds
@@ -44,9 +39,19 @@ jobs:
     - name: Customize
       working-directory: ./openwrt
       run: |
-        sed -i 's/192\.168\.1\.1/192\.168\.9\.1/g' ./package/base-files/files/bin/config_generate
+        # Localize
+        sed -i -e 's/192\.168\.1\.1/192\.168\.9\.1/g' -e 's/UTC/Asia\/Shanghai/g' -e 's/0\.openwrt\.pool\.ntp\.org/ntp\.tencent\.com/' -e 's/1\.openwrt\.pool\.ntp\.org/ntp\.aliyun\.com/' \
+        -e 's/2\.openwrt\.pool\.ntp\.org/ntp\.ntsc\.ac\.cn/' -e '/3\.openwrt\.pool\.ntp\.org/d' ./package/base-files/files/bin/config_generate
+        # Use aliyun mirror
+        sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
+        wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
+        zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
+        sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
+        rm -f Packages.gz
+        # Add build date to release name
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/$VERSION_TAG @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/OpenWrt 22.03 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        # Make .config
         cp ../configs/RM2100_config ./.config
         make defconfig
         cp ./.config ../configs/new_all_RM2100_config
