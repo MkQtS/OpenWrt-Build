@@ -11,13 +11,11 @@ jobs:
 
     steps:
     - name: Initialize environment
-      env:
-        DEBIAN_FRONTEND: noninteractive
       run: |
         sudo swapoff -a
         sudo rm -f /swapfile
         sudo apt -yq update
-        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev
+        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
         sudo apt -yq clean
 
     - name: Checkout repo
@@ -47,9 +45,9 @@ jobs:
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
         mkdir -p ./files/etc/uci-defaults/
-        cp ../custom/zju_localize ./files/etc/uci-defaults/
+        cp ../custom/zzz_localize ./files/etc/uci-defaults/
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-        cp ../custom/wallhaven-dpepjo.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+        cp ../custom/*.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ../configs/X64_config ./.config
         make defconfig
         cp ./.config ../configs/new_all_X64_config
@@ -89,9 +87,13 @@ jobs:
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
         mkdir release_path
         mv ./openwrt/bin/targets/x86/64/* ./release_path
+        mv ./openwrt/dl ./release_path
+        rm -rf ./openwrt
         cd ./release_path
-        tar -czf packages.tgz ./packages
-        rm -rf ../openwrt ./packages
+        tar -czf packages.tgz ./packages --remove-files
+        tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
+        du -h dl_cache.tar.zst
+        df -h
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
