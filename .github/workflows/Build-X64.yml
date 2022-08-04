@@ -34,6 +34,16 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
+    - name: Restore dl files
+      working-directory: ./openwrt
+      run: |
+        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst && dlCacheState="exist"
+        if [ "$dlCacheState" = "exist" ]; then
+          tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
+        else
+          echo "dl cache does not exist."
+        fi
+
     - name: Customize
       working-directory: ./openwrt
       run: |
@@ -79,8 +89,18 @@ jobs:
     - name: Build firmware
       working-directory: ./openwrt
       run: |
+        du -h --max-depth=1
         echo -e "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
+        du -h --max-depth=1
+
+    - name: Delete old release
+      uses: dev-drprasad/delete-tag-and-release@v0.2.0
+      with:
+        delete_release: true
+        tag_name: latest-x64
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Prepare for release
       run: |
@@ -92,16 +112,6 @@ jobs:
         cd ./release_path
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
-        du -h dl_cache.tar.zst
-        df -h
-
-    - name: Delete old release
-      uses: dev-drprasad/delete-tag-and-release@v0.2.0
-      with:
-        delete_release: true
-        tag_name: latest-x64
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Upload to releases
       uses: ncipollo/release-action@v1.10.0
@@ -116,6 +126,6 @@ jobs:
       with:
         token: ${{ github.token }}
         repository: ${{ github.repository }}
-        retain_days: 15
+        retain_days: 5
         keep_minimum_runs: 1
 
