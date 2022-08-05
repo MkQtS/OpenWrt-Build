@@ -92,8 +92,11 @@ jobs:
       working-directory: ./openwrt
       run: |
         du -h --max-depth=1
-        echo -e "Using $(($(nproc)+1)) threads to compile..."
+        echo "--------------------"
+        echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
+        echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
+        echo "--------------------"
         du -h --max-depth=1
 
     - name: Delete old release
@@ -104,9 +107,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Prepare for release
+    - name: Manage release files
       run: |
-        echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
         mkdir release_path
         mv ./openwrt/bin/targets/ramips/mt7621/* ./release_path
         mv ./openwrt/dl ./release_path
