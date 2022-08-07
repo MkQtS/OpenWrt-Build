@@ -42,16 +42,6 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Restore dl files
-      run: |
-        cd $OPENWRT_PATH
-        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst && dlCacheState="exist"
-        if [ "$dlCacheState" = "exist" ]; then
-          tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
-        else
-          echo "dl cache does not exist."
-        fi
-
     - name: Restore build cache-1
       continue-on-error: true
       uses: dawidd6/action-download-artifact@v2
@@ -64,7 +54,7 @@ jobs:
       run: |
         if [ -e Build_cache.tar.zst ]; then
           tar --zstd -xf Build_cache.tar.zst
-          mv dl build_dir stage_dir -t $OPENWRT_PATH
+          mv dl build_dir staging_dir -t $OPENWRT_PATH
           rm -f Build_cache.tar.zst
           echo "Last build cache restored."
         else
@@ -80,7 +70,7 @@ jobs:
         rm -f Packages.gz
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" ./package/base-files/files/etc/openwrt_release
         mkdir -p ./files/etc/uci-defaults/
         cp $MAIN_PATH/custom/zju_localize ./files/etc/uci-defaults/
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
@@ -108,7 +98,7 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./configs/all_X64_config ./configs/diff_X64_config
+        git add $MAIN_PATH/configs/configs/all_X64_config $MAIN_PATH/configs/configs/diff_X64_config
         git commit -m "Update config files"
         git push origin main
 
@@ -140,7 +130,7 @@ jobs:
         make clean
         du -h --max-depth=1
         echo "--------------------"
-        mv $OPENWRT_PATH/dl $OPENWRT_PATH/build_dir $OPENWRT_PATH/stage_dir -t $ARTIFACTS_PATH
+        mv $OPENWRT_PATH/dl $OPENWRT_PATH/build_dir $OPENWRT_PATH/staging_dir -t $ARTIFACTS_PATH
         cd $ARTIFACTS_PATH
         tar --zstd -cf Build_cache.tar.zst * --remove-files
         rm -rf $OPENWRT_PATH

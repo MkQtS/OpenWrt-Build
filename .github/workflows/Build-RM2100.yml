@@ -28,25 +28,42 @@ jobs:
         ref: openwrt-22.03
         path: 'openwrt'
 
-    - name: Update & Install feeds
-      working-directory: ./openwrt
+    - name: Set path
       run: |
+        mkdir -p releases artifacts
+        echo "MAIN_PATH=$PWD" >> $GITHUB_ENV
+        echo "OPENWRT_PATH=$PWD/openwrt" >> $GITHUB_ENV
+        echo "RELEASES_PATH=$PWD/releases" >> $GITHUB_ENV
+        echo "ARTIFACTS_PATH=$PWD/artifacts" >> $GITHUB_ENV
+
+    - name: Update & Install feeds
+      run: |
+        cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
-    - name: Restore dl files
-      working-directory: ./openwrt
+    - name: Restore build cache-1
+      continue-on-error: true
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: Build-RM2100.yml
+        workflow_conclusion: success
+        name: last_build_cache
+
+    - name: Restore build cache-2
       run: |
-        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-rm2100/dl_cache.tar.zst && dlCacheState="exist"
-        if [ "$dlCacheState" = "exist" ]; then
-          tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
+        if [ -e Build_cache.tar.zst ]; then
+          tar --zstd -xf Build_cache.tar.zst
+          mv dl build_dir staging_dir -t $OPENWRT_PATH
+          rm -f Build_cache.tar.zst
+          echo "Last build cache restored."
         else
-          echo "dl cache does not exist."
+          echo "Cache file not found."
         fi
 
     - name: Customize
-      working-directory: ./openwrt
       run: |
+        cd $OPENWRT_PATH
         # Localize
         sed -i -e 's/192\.168\.1\.1/192\.168\.9\.1/g' -e 's/0\.openwrt\.pool\.ntp\.org/ntp\.tencent\.com/' -e 's/1\.openwrt\.pool\.ntp\.org/ntp\.aliyun\.com/' \
         -e 's/2\.openwrt\.pool\.ntp\.org/ntp\.ntsc\.ac\.cn/' -e '/3\.openwrt\.pool\.ntp\.org/d' ./package/base-files/files/bin/config_generate
@@ -58,17 +75,17 @@ jobs:
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         # Add build date to release name
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/OpenWrt 22.03 @$BUILD_DATE/g" package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/OpenWrt 22.03 @$BUILD_DATE/g" ./package/base-files/files/etc/openwrt_release
         # Make .config
-        cp ../configs/RM2100_config ./.config
+        cp $MAIN_PATH/configs/RM2100_config ./.config
         make defconfig
-        cp ./.config ../configs/new_all_RM2100_config
-        sh ./scripts/diffconfig.sh > ../configs/new_diff_RM2100_config
+        cp ./.config $MAIN_PATH/configs/new_all_RM2100_config
+        sh ./scripts/diffconfig.sh > $MAIN_PATH/configs/new_diff_RM2100_config
 
     - name: Diff config
       id: diff_config
-      working-directory: ./configs
       run: |
+        cd $MAIN_PATH/configs
         if [ "$(diff -q new_all_RM2100_config all_RM2100_config)" != "" ]
         then
           echo "::set-output name=state::changed"
@@ -84,13 +101,13 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add ./configs/all_RM2100_config ./configs/diff_RM2100_config
+        git add $MAIN_PATH/configs/all_RM2100_config $MAIN_PATH/configs/diff_RM2100_config
         git commit -m "Update config files"
         git push origin main
 
     - name: Build firmware
-      working-directory: ./openwrt
       run: |
+        cd $OPENWRT_PATH
         du -h --max-depth=1
         echo "--------------------"
         echo "Using $(($(nproc)+1)) threads to compile..."
@@ -107,21 +124,32 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Manage release files
+    - name: Manage releases and artifacts
       run: |
-        mkdir release_path
-        mv ./openwrt/bin/targets/ramips/mt7621/* ./release_path
-        mv ./openwrt/dl ./release_path
-        rm -rf ./openwrt
-        cd ./release_path
+        mv $OPENWRT_PATH/bin/targets/ramips/mt7621/* $RELEASES_PATH
+        cd $RELEASES_PATH
         tar -czf packages.tgz ./packages --remove-files
-        tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
+        cd $OPENWRT_PATH
+        make clean
+        du -h --max-depth=1
+        echo "--------------------"
+        mv $OPENWRT_PATH/dl $OPENWRT_PATH/build_dir $OPENWRT_PATH/staging_dir -t $ARTIFACTS_PATH
+        cd $ARTIFACTS_PATH
+        tar --zstd -cf Build_cache.tar.zst * --remove-files
+        rm -rf $OPENWRT_PATH
 
     - name: Upload to releases
       uses: ncipollo/release-action@v1.10.0
       with:
         name: latest rm2100 firmware
         tag: latest-rm2100
-        artifacts: release_path/*
+        artifacts: ${{ env.RELEASES_PATH }}/*
         body: ${{ env.RELEASE_BODY }}
+
+    - name: Upload to Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: last_build_cache
+        path: ${{ env.ARTIFACTS_PATH }}/Build_cache.tar.zst
+        retention-days: 14
 
