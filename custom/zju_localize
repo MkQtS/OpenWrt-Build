@@ -17,10 +17,6 @@ uci -q batch << EOF
     add_list firewall.@zone[1].network='wan'
     add_list firewall.@zone[1].network='wan6'
     add_list firewall.@zone[1].network='zju'
-
-    set luci.diag.dns='img.alicdn.com'
-    set luci.diag.route='img.alicdn.com'
-    set luci.diag.ping='img.alicdn.com'
 EOF
 
 uci commit && reload_config
