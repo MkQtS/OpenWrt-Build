@@ -36,12 +36,6 @@ jobs:
         echo "RELEASES_PATH=$PWD/releases" >> $GITHUB_ENV
         echo "ARTIFACTS_PATH=$PWD/artifacts" >> $GITHUB_ENV
 
-    - name: Update & Install feeds
-      run: |
-        cd $OPENWRT_PATH
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
-
     - name: Restore build cache-1
       continue-on-error: true
       uses: dawidd6/action-download-artifact@v2
@@ -60,6 +54,12 @@ jobs:
         else
           echo "Cache file not found."
         fi
+
+    - name: Update & Install feeds
+      run: |
+        cd $OPENWRT_PATH
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
 
     - name: Customize
       run: |
