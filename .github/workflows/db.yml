@@ -1,0 +1,31 @@
+name: new
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Restore build cache-1
+      continue-on-error: true
+      uses: dawidd6/action-download-artifact@v2
+      with:
+        workflow: Build-X64.yml
+        workflow_conclusion: success
+        name: last_build_cache
+
+    - name: Restore build cache-2
+      run: |
+        tree -s -L 3 | tee filelist
+
+    - name: Upload to Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: list
+        path: filelist
+        retention-days: 3
