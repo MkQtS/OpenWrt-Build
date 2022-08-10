@@ -98,7 +98,7 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add $MAIN_PATH/configs/configs/all_X64_config $MAIN_PATH/configs/configs/diff_X64_config
+        git add $MAIN_PATH/configs/all_X64_config $MAIN_PATH/configs/diff_X64_config
         git commit -m "Update config files"
         git push origin main
 
