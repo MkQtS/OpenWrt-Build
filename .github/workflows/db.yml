@@ -15,17 +15,12 @@ jobs:
       continue-on-error: true
       uses: dawidd6/action-download-artifact@v2
       with:
-        workflow: Build-X64.yml
+        workflow: Build-RM2100.yml
         workflow_conclusion: success
         name: last_build_cache
+        skip_unpack: true
 
     - name: Restore build cache-2
       run: |
-        tree -s -L 3 | tee filelist
+        tree -a -s -L 3 | tee filelist
 
-    - name: Upload to Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: list
-        path: filelist
-        retention-days: 3
