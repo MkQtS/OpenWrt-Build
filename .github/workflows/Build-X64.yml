@@ -2,7 +2,7 @@ name: Build X86-64
 
 on:
   schedule:
-    - cron: 0 2 * * 3
+    - cron: 0 12 * * 3
   workflow_dispatch:
 
 jobs:
@@ -36,22 +36,22 @@ jobs:
         echo "RELEASES_PATH=$PWD/releases" >> $GITHUB_ENV
         echo "ARTIFACTS_PATH=$PWD/artifacts" >> $GITHUB_ENV
 
-    - name: Restore build cache-1
+    - name: Restore dl cache-1
       continue-on-error: true
       uses: dawidd6/action-download-artifact@v2
       with:
         workflow: Build-X64.yml
         workflow_conclusion: success
-        name: last_build_cache
+        name: last_dl_cache
 
-    - name: Restore build cache-2
+    - name: Restore dl cache-2
       run: |
-        if [ -e last_build_cache.zip ]; then
-          unzip -o last_build_cache.zip
-          tar --zstd -xf Build_cache.tar.zst
-          mv dl build_dir staging_dir -t $OPENWRT_PATH
-          rm -f Build_cache.tar.zst
-          echo "Last build cache restored."
+        tree -a -s -L 2
+        if [ -e dl_cache.tar.zst ]; then
+          tar --zstd -xf dl_cache.tar.zst
+          mv dl $OPENWRT_PATH
+          rm -f dl_cache.tar.zst
+          echo "Last dl cache restored."
         else
           echo "Cache file not found."
         fi
@@ -106,13 +106,9 @@ jobs:
     - name: Build firmware
       run: |
         cd $OPENWRT_PATH
-        du -h --max-depth=1
-        echo "--------------------"
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
-        echo "--------------------"
-        du -h --max-depth=1
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
@@ -127,13 +123,9 @@ jobs:
         mv $OPENWRT_PATH/bin/targets/x86/64/* $RELEASES_PATH
         cd $RELEASES_PATH
         tar -czf packages.tgz ./packages --remove-files
-        cd $OPENWRT_PATH
-        make clean
-        du -h --max-depth=1
-        echo "--------------------"
-        mv $OPENWRT_PATH/dl $OPENWRT_PATH/build_dir $OPENWRT_PATH/staging_dir -t $ARTIFACTS_PATH
+        mv $OPENWRT_PATH/dl $ARTIFACTS_PATH
         cd $ARTIFACTS_PATH
-        tar --zstd -cf Build_cache.tar.zst * --remove-files
+        tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
         rm -rf $OPENWRT_PATH
 
     - name: Upload to Releases
@@ -147,8 +139,8 @@ jobs:
     - name: Upload to Artifacts
       uses: actions/upload-artifact@v3
       with:
-        name: last_build_cache
-        path: ${{ env.ARTIFACTS_PATH }}/Build_cache.tar.zst
+        name: last_dl_cache
+        path: ${{ env.ARTIFACTS_PATH }}/dl_cache.tar.zst
         retention-days: 14
 
     - name: Delete workflow runs
