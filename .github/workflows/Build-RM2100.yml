@@ -46,7 +46,8 @@ jobs:
 
     - name: Restore build cache-2
       run: |
-        if [ -e Build_cache.tar.zst ]; then
+        if [ -e last_build_cache.zip ]; then
+          unzip -o last_build_cache.zip
           tar --zstd -xf Build_cache.tar.zst
           mv dl build_dir staging_dir -t $OPENWRT_PATH
           rm -f Build_cache.tar.zst
