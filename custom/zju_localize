@@ -7,15 +7,10 @@ sed -i '1i #30 23 * * * poweroff' /etc/crontabs/root
 
 uci -q batch << EOF
     set dhcp.@dnsmasq[0].rebind_protection='0'
-
     set network.zju=interface
     set network.zju.proto='l2tp'
     set network.zju.server='lns.zju.edu.cn'
     set network.zju.mtu='1460'
-
-    delete firewall.@zone[1].network
-    add_list firewall.@zone[1].network='wan'
-    add_list firewall.@zone[1].network='wan6'
     add_list firewall.@zone[1].network='zju'
 EOF
 
