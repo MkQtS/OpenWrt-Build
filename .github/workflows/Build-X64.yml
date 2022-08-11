@@ -2,7 +2,7 @@ name: Build X86-64
 
 on:
   schedule:
-    - cron: 0 2 * * 4
+    - cron: 0 10 * * 4
   workflow_dispatch:
 
 jobs:
@@ -34,33 +34,22 @@ jobs:
         echo "MAIN_PATH=$PWD" >> $GITHUB_ENV
         echo "OPENWRT_PATH=$PWD/openwrt" >> $GITHUB_ENV
         echo "RELEASES_PATH=$PWD/releases" >> $GITHUB_ENV
-        echo "ARTIFACTS_PATH=$PWD/artifacts" >> $GITHUB_ENV
-
-    - name: Restore dl cache-1
-      continue-on-error: true
-      uses: dawidd6/action-download-artifact@v2
-      with:
-        workflow: Build-X64.yml
-        workflow_conclusion: success
-        name: last_dl_cache
-
-    - name: Restore dl cache-2
-      run: |
-        tree -a -s -L 2
-        if [ -e dl_cache.tar.zst ]; then
-          tar --zstd -xf dl_cache.tar.zst
-          mv dl $OPENWRT_PATH
-          rm -f dl_cache.tar.zst
-          echo "Last dl cache restored."
-        else
-          echo "Cache file not found."
-        fi
 
     - name: Update & Install feeds
       run: |
         cd $OPENWRT_PATH
         ./scripts/feeds update -a
         ./scripts/feeds install -a
+
+    - name: Restore dl files
+      run: |
+        cd $OPENWRT_PATH
+        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst && dlCacheState="exist"
+        if [ "$dlCacheState" = "exist" ]; then
+          tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
+        else
+          echo "dl cache does not exist."
+        fi
 
     - name: Customize
       run: |
@@ -121,12 +110,11 @@ jobs:
     - name: Manage releases and artifacts
       run: |
         mv $OPENWRT_PATH/bin/targets/x86/64/* $RELEASES_PATH
+        mv $OPENWRT_PATH/dl $RELEASES_PATH
+        rm -rf $OPENWRT_PATH
         cd $RELEASES_PATH
         tar -czf packages.tgz ./packages --remove-files
-        mv $OPENWRT_PATH/dl $ARTIFACTS_PATH
-        cd $ARTIFACTS_PATH
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
-        rm -rf $OPENWRT_PATH
 
     - name: Upload to Releases
       uses: ncipollo/release-action@v1.10.0
@@ -136,18 +124,11 @@ jobs:
         artifacts: ${{ env.RELEASES_PATH }}/*
         body: ${{ env.RELEASE_BODY }}
 
-    - name: Upload to Artifacts
-      uses: actions/upload-artifact@v3
-      with:
-        name: last_dl_cache
-        path: ${{ env.ARTIFACTS_PATH }}/dl_cache.tar.zst
-        retention-days: 14
-
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
         token: ${{ github.token }}
         repository: ${{ github.repository }}
-        retain_days: 8
+        retain_days: 3
         keep_minimum_runs: 1
 
