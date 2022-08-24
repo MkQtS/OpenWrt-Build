@@ -42,7 +42,6 @@ CONFIG_DROPBEAR_ECC=y
 
 CONFIG_PACKAGE_kmod-ata-core=y
 CONFIG_PACKAGE_kmod-ata-marvell-sata=y
-CONFIG_PACKAGE_kmod-igc=y
 CONFIG_PACKAGE_kmod-macvlan=y
 CONFIG_PACKAGE_kmod-nls-base=y
 CONFIG_PACKAGE_kmod-usb-core=y
