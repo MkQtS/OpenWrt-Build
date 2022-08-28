@@ -4,6 +4,15 @@ on:
   schedule:
     - cron: 0 9 * * 3
   workflow_dispatch:
+    inputs:
+      zju_localize:
+        description: "Whether to add zju scripts"
+        required: true
+        default: "no"
+        type: choice
+        options:
+        - yes
+        - no
 
 jobs:
   build:
@@ -63,7 +72,10 @@ jobs:
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" ./package/base-files/files/etc/openwrt_release
         mkdir -p ./files/etc/uci-defaults/
-        cp $MAIN_PATH/custom/zju_localize ./files/etc/uci-defaults/
+        if [ ${{ inputs.zju_localize }}x != "no"x ]; then
+          cp $MAIN_PATH/custom/zju_localize ./files/etc/uci-defaults/
+          cp $MAIN_PATH/custom/90-zjudown ./files/etc/hotplug.d/iface/
+        fi
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp $MAIN_PATH/custom/*.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp $MAIN_PATH/configs/X64_config ./.config
