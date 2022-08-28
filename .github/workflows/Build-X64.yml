@@ -110,7 +110,11 @@ jobs:
         cd $OPENWRT_PATH
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
-        echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
+        if [ ${{ inputs.zju_localize }}x != "no"x ]; then
+          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localize" >> $GITHUB_ENV
+        else
+          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize" >> $GITHUB_ENV
+        fi
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
