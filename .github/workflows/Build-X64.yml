@@ -2,7 +2,7 @@ name: Build X86-64
 
 on:
   schedule:
-    - cron: 0 9 * * 3
+    - cron: 0 8 * * 3
   workflow_dispatch:
     inputs:
       zju_localize:
@@ -54,11 +54,12 @@ jobs:
       run: |
         cd $OPENWRT_PATH
         wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst && dlCacheState="exist"
-        if [ "$dlCacheState" = "exist" ]; then
+        if [ "${dlCacheState}" = "exist" ]; then
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
         else
           echo "dl cache does not exist."
         fi
+        ls -lha
 
     - name: Customize
       run: |
@@ -70,12 +71,13 @@ jobs:
         rm -f Packages.gz
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/ImmortalWrt 21.02 @$BUILD_DATE/g" ./package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/ImmortalWrt 21.02 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         if [ ${{ inputs.zju_localize }}x != "no"x ]; then
           mkdir -p ./files/etc/uci-defaults/
           cp $MAIN_PATH/custom/zju_localize ./files/etc/uci-defaults/
           mkdir -p ./files/etc/hotplug.d/iface/
           cp $MAIN_PATH/custom/90-zjudown ./files/etc/hotplug.d/iface/
+          echo "Added localization for zju"
         fi
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp $MAIN_PATH/custom/*.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
@@ -112,9 +114,9 @@ jobs:
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
         if [ ${{ inputs.zju_localize }}x != "no"x ]; then
-          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localize" >> $GITHUB_ENV
+          echo 'RELEASE_BODY="Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localize"' >> $GITHUB_ENV
         else
-          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize" >> $GITHUB_ENV
+          echo 'RELEASE_BODY="Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize"' >> $GITHUB_ENV
         fi
 
     - name: Delete old release

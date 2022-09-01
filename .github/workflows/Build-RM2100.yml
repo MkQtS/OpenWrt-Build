@@ -2,7 +2,7 @@ name: Build RM-AC2100
 
 on:
   schedule:
-    - cron: 0 11 * * 3
+    - cron: 0 10 * * 3
   workflow_dispatch:
 
 jobs:
@@ -45,11 +45,12 @@ jobs:
       run: |
         cd $OPENWRT_PATH
         wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-rm2100/dl_cache.tar.zst && dlCacheState="exist"
-        if [ "$dlCacheState" = "exist" ]; then
+        if [ "${dlCacheState}" = "exist" ]; then
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
         else
           echo "dl cache does not exist."
         fi
+        ls -lha
 
     - name: Customize
       run: |
@@ -66,7 +67,7 @@ jobs:
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         # Add build date to release name
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/OpenWrt 22.03 @$BUILD_DATE/g" ./package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/OpenWrt 22.03 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         # Make .config
         cp $MAIN_PATH/configs/RM2100_config ./.config
         make defconfig
@@ -101,7 +102,7 @@ jobs:
         cd $OPENWRT_PATH
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
-        echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
+        echo 'RELEASE_BODY="Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")"' >> $GITHUB_ENV
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
