@@ -8,11 +8,11 @@ on:
       zju_localize:
         description: "Whether to add zju scripts"
         required: true
-        default: "no"
+        default: "No"
         type: choice
         options:
-        - "yes"
-        - "no"
+        - "Add"
+        - "No"
 
 jobs:
   build:
@@ -59,7 +59,7 @@ jobs:
         else
           echo "dl cache does not exist."
         fi
-        ls -lha
+        du -h --max-depth=1
 
     - name: Customize
       run: |
@@ -72,7 +72,7 @@ jobs:
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
-        if [ ${{ inputs.zju_localize }}x != "no"x ]; then
+        if [ ${{ inputs.zju_localize }}x != "No"x ]; then
           mkdir -p ./files/etc/uci-defaults/
           cp $MAIN_PATH/custom/zju_localize ./files/etc/uci-defaults/
           mkdir -p ./files/etc/hotplug.d/iface/
@@ -114,9 +114,9 @@ jobs:
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
         if [ ${{ inputs.zju_localize }}x != "no"x ]; then
-          echo 'RELEASE_BODY="Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localize"' >> $GITHUB_ENV
+          echo "RELEASE_BODY=\"Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localize\"" >> $GITHUB_ENV
         else
-          echo 'RELEASE_BODY="Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize"' >> $GITHUB_ENV
+          echo "RELEASE_BODY=\"Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize\"" >> $GITHUB_ENV
         fi
 
     - name: Delete old release
@@ -133,6 +133,7 @@ jobs:
         mv $OPENWRT_PATH/dl $RELEASES_PATH
         rm -rf $OPENWRT_PATH
         cd $RELEASES_PATH
+        du -h --max-depth=1
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
 

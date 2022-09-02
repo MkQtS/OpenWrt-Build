@@ -50,7 +50,7 @@ jobs:
         else
           echo "dl cache does not exist."
         fi
-        ls -lha
+        du -h --max-depth=1
 
     - name: Customize
       run: |
@@ -102,7 +102,7 @@ jobs:
         cd $OPENWRT_PATH
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
-        echo 'RELEASE_BODY="Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")"' >> $GITHUB_ENV
+        echo "RELEASE_BODY=\"Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")\"" >> $GITHUB_ENV
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
@@ -118,6 +118,7 @@ jobs:
         mv $OPENWRT_PATH/dl $RELEASES_PATH
         rm -rf $OPENWRT_PATH
         cd $RELEASES_PATH
+        du -h --max-depth=1
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
 
