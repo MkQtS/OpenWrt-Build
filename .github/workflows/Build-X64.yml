@@ -2,7 +2,7 @@ name: Build X86-64
 
 on:
   schedule:
-    - cron: 40 9 * * 6
+    - cron: 0 10 * * 6
   workflow_dispatch:
     inputs:
       zju_localize:
@@ -56,6 +56,7 @@ jobs:
         wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst && dlCacheState="exist"
         if [ "${dlCacheState}" = "exist" ]; then
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
+          echo "dl cache restored."
         else
           echo "dl cache does not exist."
         fi
@@ -116,7 +117,7 @@ jobs:
         if [ ${{ inputs.zju_localize }}x != "no"x ]; then
           echo "RELEASE_BODY=\"Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localize\"" >> $GITHUB_ENV
         else
-          echo "RELEASE_BODY=\"Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize\"" >> $GITHUB_ENV
+          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize" >> $GITHUB_ENV
         fi
 
     - name: Delete old release

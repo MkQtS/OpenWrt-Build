@@ -1,6 +1,6 @@
 #!/bin/sh
 # If ZJU L2TP lost while WAN DHCP works, the script would reconnect ZJU L2TP.
-( [ ${INTERFACE} = zju ] && [ ${ACTION} =ifdown ] ) || exit 0
+( [ ${INTERFACE} = zju ] && [ ${ACTION} = ifdown ] ) || exit 0
 ( ifstatus wan | grep -q '"up": true' ) || exit 0
 logger -t zjudown "ZJU L2TP is down, wait for 5 seconds..."
 sleep 5

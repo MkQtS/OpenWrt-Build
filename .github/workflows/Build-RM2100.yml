@@ -2,7 +2,7 @@ name: Build RM-AC2100
 
 on:
   schedule:
-    - cron: 0 10 * * 3
+    - cron: 0 8 * * 6
   workflow_dispatch:
 
 jobs:
@@ -47,6 +47,7 @@ jobs:
         wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-rm2100/dl_cache.tar.zst && dlCacheState="exist"
         if [ "${dlCacheState}" = "exist" ]; then
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
+          echo "dl cache restored."
         else
           echo "dl cache does not exist."
         fi
@@ -102,7 +103,7 @@ jobs:
         cd $OPENWRT_PATH
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
-        echo "RELEASE_BODY=\"Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")\"" >> $GITHUB_ENV
+        echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
 
     - name: Delete old release
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
