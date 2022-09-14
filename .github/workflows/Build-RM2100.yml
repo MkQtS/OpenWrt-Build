@@ -61,11 +61,11 @@ jobs:
         -e 's/2\.openwrt\.pool\.ntp\.org/ntp\.ntsc\.ac\.cn/' -e '/3\.openwrt\.pool\.ntp\.org/d' ./package/base-files/files/bin/config_generate
         sed -i 's/\${host:-openwrt\.org}/img\.alicdn\.com/g' ./feeds/luci/modules/luci-mod-network/root/etc/uci-defaults/50_luci-mod-admin-full
         # Use aliyun mirror
-        #sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
-        #wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
-        #zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
-        #rm -f Packages.gz
-        #sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
+        sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
+        wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
+        zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
+        rm -f Packages.gz
+        sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         # Add build date to release name
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/OpenWrt 22.03 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release

@@ -8,7 +8,6 @@ CONFIG_LUCI_LANG_zh_Hant=y
 
 CONFIG_PACKAGE_curl=y
 CONFIG_PACKAGE_lscpu=y
-CONFIG_PACKAGE_opkg=n
 CONFIG_PACKAGE_wpad-basic-wolfssl=n
 CONFIG_PACKAGE_wpad-wolfssl=y
 CONFIG_PACKAGE_wget-ssl=y
