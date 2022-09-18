@@ -13,7 +13,6 @@ jobs:
     - name: Initialize environment
       run: |
         sudo swapoff -a
-        sudo rm -f /swapfile
         sudo apt -yq update
         sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev zstd
         sudo apt -yq clean
@@ -37,13 +36,13 @@ jobs:
 
     - name: Update & Install feeds
       run: |
-        cd $OPENWRT_PATH
+        cd ${OPENWRT_PATH}
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
     - name: Restore dl files
       run: |
-        cd $OPENWRT_PATH
+        cd ${OPENWRT_PATH}
         wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-rm2100/dl_cache.tar.zst && dlCacheState="exist"
         if [ "${dlCacheState}" = "exist" ]; then
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
@@ -55,7 +54,7 @@ jobs:
 
     - name: Customize
       run: |
-        cd $OPENWRT_PATH
+        cd ${OPENWRT_PATH}
         # Localize
         sed -i -e 's/192\.168\.1\.1/192\.168\.9\.1/g' -e 's/0\.openwrt\.pool\.ntp\.org/ntp\.tencent\.com/' -e 's/1\.openwrt\.pool\.ntp\.org/ntp\.aliyun\.com/' \
         -e 's/2\.openwrt\.pool\.ntp\.org/ntp\.ntsc\.ac\.cn/' -e '/3\.openwrt\.pool\.ntp\.org/d' ./package/base-files/files/bin/config_generate
@@ -70,15 +69,15 @@ jobs:
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/OpenWrt 22.03 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         # Make .config
-        cp $MAIN_PATH/configs/RM2100_config ./.config
+        cp ${MAIN_PATH}/configs/RM2100_config ./.config
         make defconfig
-        cp ./.config $MAIN_PATH/configs/new_all_RM2100_config
-        sh ./scripts/diffconfig.sh > $MAIN_PATH/configs/new_diff_RM2100_config
+        cp ./.config ${MAIN_PATH}/configs/new_all_RM2100_config
+        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/new_diff_RM2100_config
 
     - name: Diff config
       id: diff_config
       run: |
-        cd $MAIN_PATH/configs
+        cd ${MAIN_PATH}/configs
         if [ "$(diff -q new_all_RM2100_config all_RM2100_config)" != "" ]
         then
           echo "::set-output name=state::changed"
@@ -94,13 +93,13 @@ jobs:
       run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
-        git add $MAIN_PATH/configs/all_RM2100_config $MAIN_PATH/configs/diff_RM2100_config
+        git add ${MAIN_PATH}/configs/all_RM2100_config ${MAIN_PATH}/configs/diff_RM2100_config
         git commit -m "Update config files"
         git push origin main
 
     - name: Build firmware
       run: |
-        cd $OPENWRT_PATH
+        cd ${OPENWRT_PATH}
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
@@ -115,10 +114,10 @@ jobs:
 
     - name: Manage releases and artifacts
       run: |
-        mv $OPENWRT_PATH/bin/targets/ramips/mt7621/* $RELEASES_PATH
-        mv $OPENWRT_PATH/dl $RELEASES_PATH
-        rm -rf $OPENWRT_PATH
-        cd $RELEASES_PATH
+        mv ${OPENWRT_PATH}/bin/targets/ramips/mt7621/* ${RELEASES_PATH}
+        mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
+        rm -rf ${OPENWRT_PATH}
+        cd ${RELEASES_PATH}
         du -h --max-depth=1
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
