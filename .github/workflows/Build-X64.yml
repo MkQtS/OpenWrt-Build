@@ -114,9 +114,9 @@ jobs:
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
         if [ ${{ inputs.zju_localize }}x != "no"x ]; then
-          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localize" >> $GITHUB_ENV
+          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localization" >> $GITHUB_ENV
         else
-          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localize" >> $GITHUB_ENV
+          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localization" >> $GITHUB_ENV
         fi
 
     - name: Delete old release
