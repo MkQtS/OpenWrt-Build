@@ -53,7 +53,7 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst || dlCacheState="notExist"
-        if [ "${dlCacheState}" = "notExist" ]; then
+        if [ ${dlCacheState}x = "notExist"x ]; then
           echo "dl cache does not exist."
         else
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
@@ -113,7 +113,7 @@ jobs:
         cd ${OPENWRT_PATH}
         echo "Using $(($(nproc)+1)) threads to compile..."
         make -j $(($(nproc)+1)) download world
-        if [ ${{ inputs.zju_localize }}x != "no"x ]; then
+        if [ ${{ inputs.zju_localize }}x != "No"x ]; then
           echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localization" >> $GITHUB_ENV
         else
           echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localization" >> $GITHUB_ENV
