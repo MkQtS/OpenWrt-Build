@@ -52,14 +52,14 @@ jobs:
     - name: Restore dl files
       run: |
         cd ${OPENWRT_PATH}
-        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst && dlCacheState="exist"
-        if [ "${dlCacheState}" = "exist" ]; then
+        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-x64/dl_cache.tar.zst || dlCacheState="notExist"
+        if [ "${dlCacheState}" = "notExist" ]; then
+          echo "dl cache does not exist."
+        else
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
           echo "dl cache restored."
-        else
-          echo "dl cache does not exist."
+          du -h --max-depth=1
         fi
-        du -h --max-depth=1
 
     - name: Customize
       run: |
