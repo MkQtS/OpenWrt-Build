@@ -80,22 +80,18 @@ jobs:
         cd ${MAIN_PATH}/configs
         if [ "$(diff -q new_all_RM2100_config all_RM2100_config)" != "" ]
         then
-          echo "::set-output name=state::changed"
           rm -f all_RM2100_config diff_RM2100_config
           mv new_all_RM2100_config all_RM2100_config
           mv new_diff_RM2100_config diff_RM2100_config
+          cd ${MAIN_PATH}
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add ${MAIN_PATH}/configs/all_RM2100_config ${MAIN_PATH}/configs/diff_RM2100_config
+          git commit -m "Update config files"
+          git push origin main
         else
           echo "Configs have not changed."
         fi
-
-    - name: Commit config files
-      if: steps.diff_config.outputs.state == 'changed'
-      run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add ${MAIN_PATH}/configs/all_RM2100_config ${MAIN_PATH}/configs/diff_RM2100_config
-        git commit -m "Update config files"
-        git push origin main
 
     - name: Build firmware
       run: |
@@ -123,7 +119,7 @@ jobs:
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
 
     - name: Upload to releases
-      uses: ncipollo/release-action@v1.10.0
+      uses: ncipollo/release-action@v1
       with:
         name: latest rm2100 firmware
         tag: latest-rm2100
