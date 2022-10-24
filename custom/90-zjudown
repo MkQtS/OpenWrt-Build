@@ -1,10 +1,37 @@
 #!/bin/sh
-# If ZJU L2TP lost while WAN DHCP works, the script would reconnect ZJU L2TP.
-( [ ${INTERFACE} = zju ] && [ ${ACTION} = ifdown ] ) || exit 0
-( ifstatus wan | grep -q '"up": true' ) || exit 0
-logger -t zjudown "ZJU L2TP is down, wait for 5 seconds..."
+# If ZJU L2TP lost while WAN DHCP works, reconnect ZJU L2TP.
+# Put it in /etc/hotplug.d/iface/
+[ ${INTERFACE} = "zju" ] && ([ ${ACTION} = "ifup-failed" ] || [ ${ACTION} = "ifdown" ]) || exit 0
+
+CheckZJU() {
+    ZJU_DOWN="1"
+    if (ifstatus wan | grep -q '"up": true') && (ifstatus zju | grep -q '"up": true'); then
+        ZJU_DOWN="0"
+    fi
+    return ${ZJU_DOWN}
+}
+
+logger -t zjudown "ZJU L2TP seems down, wait for 5 seconds..."
 sleep 5
-( ifstatus wan | grep -q '"up": true' ) || exit 0
-( ifstatus zju | grep -q '"up": true' ) && exit 0
-logger -t zjudown "Reconnect ZJU L2TP..."
-ifup zju
+TrialCount=0
+MAXTRIALNUM=3
+CheckZJU; ZJU_DOWN=$?
+
+while [ ${ZJU_DOWN} = "1" ] && [ ${TrialCount} -lt ${MAXTRIALNUM} ]; do
+    TrialCount=$(expr ${TrialCount} + 1)
+    logger -t zjudown "Start No.${TrialCount} trial..."
+    ifup zju
+    logger -t zjudown "Wait for 5 seconds..."
+    sleep 5
+    CheckZJU; ZJU_DOWN=$?
+done
+
+if [ ${TrialCount} -ge ${MAXTRIALNUM} ]; then
+    logger -t zjudown "All ${TrialCount} trials failed. Stop working."
+fi
+
+if [ ${ZJU_DOWN} = "0" ]; then
+    logger -t zjudown "ZJU L2TP is working now."
+fi
+
+exit 0
