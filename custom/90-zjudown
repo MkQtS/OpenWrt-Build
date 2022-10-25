@@ -5,10 +5,10 @@
 [ -n $(uci get network.zju.password) ] || exit 0
 
 CheckZJU() {
-    ZJU_DOWN="1"
+    ZJU_DOWN="0"
     # Only works when WAN DHCP is fine
-    if (ifstatus wan | grep -q '"up": true') && (ifstatus zju | grep -q '"up": true'); then
-        ZJU_DOWN="0"
+    if (ifstatus wan | grep -q '"up": true') && (ifstatus zju | grep -q '"up": false'); then
+        ZJU_DOWN="1"
     fi
     return ${ZJU_DOWN}
 }
