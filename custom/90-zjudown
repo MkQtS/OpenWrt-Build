@@ -11,8 +11,8 @@ CheckZJU() {
     return ${ZJU_DOWN}
 }
 
-logger -t zjudown "ZJU L2TP seems down, wait for 5 seconds..."
-sleep 5
+logger -t zjudown "ZJU L2TP seems down, wait for 10 seconds..."
+sleep 10
 TrialCount=0
 MAXTRIALNUM=3
 CheckZJU; ZJU_DOWN=$?
@@ -21,8 +21,8 @@ while [ ${ZJU_DOWN} = "1" ] && [ ${TrialCount} -lt ${MAXTRIALNUM} ]; do
     TrialCount=$(expr ${TrialCount} + 1)
     logger -t zjudown "Start No.${TrialCount} trial..."
     ifup zju
-    logger -t zjudown "Wait for 5 seconds..."
-    sleep 5
+    logger -t zjudown "Wait for 10 seconds..."
+    sleep 10
     CheckZJU; ZJU_DOWN=$?
 done
 
