@@ -1,28 +1,32 @@
 #!/bin/sh
-# If ZJU L2TP lost while WAN DHCP works, reconnect ZJU L2TP.
-# Put it in /etc/hotplug.d/iface/
-[ ${INTERFACE} = "zju" ] && ([ ${ACTION} = "ifup-failed" ] || [ ${ACTION} = "ifdown" ]) || exit 0
+# Auto reconnect ZJU L2TP. Put it in /etc/hotplug.d/iface/
+([ ${INTERFACE} = "zju" ] && [ ${ACTION} = "ifdown" ]) || exit 0
+# Don't disturb if there's no configured password
+[ -n $(uci get network.zju.password) ] || exit 0
 
 CheckZJU() {
     ZJU_DOWN="1"
+    # Only works when WAN DHCP is fine
     if (ifstatus wan | grep -q '"up": true') && (ifstatus zju | grep -q '"up": true'); then
         ZJU_DOWN="0"
     fi
     return ${ZJU_DOWN}
 }
 
-logger -t zjudown "ZJU L2TP seems down, wait for 10 seconds..."
-sleep 10
+# Wait enough time in case of the chaos at boot
+logger -t zjudown "ZJU L2TP seems down, wait for 20 seconds..."
+sleep 20
 TrialCount=0
 MAXTRIALNUM=3
 CheckZJU; ZJU_DOWN=$?
 
+# Tries at most ${MAXTRIALNUM} times
 while [ ${ZJU_DOWN} = "1" ] && [ ${TrialCount} -lt ${MAXTRIALNUM} ]; do
     TrialCount=$(expr ${TrialCount} + 1)
     logger -t zjudown "Start No.${TrialCount} trial..."
     ifup zju
-    logger -t zjudown "Wait for 10 seconds..."
-    sleep 10
+    logger -t zjudown "Wait for 15 seconds..."
+    sleep 15
     CheckZJU; ZJU_DOWN=$?
 done
 
