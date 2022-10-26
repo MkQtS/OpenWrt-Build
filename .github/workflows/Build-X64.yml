@@ -89,7 +89,7 @@ jobs:
     - name: Update configs
       run: |
         cd ${MAIN_PATH}/configs
-        if [ -n $(diff -q new_all_X64_config all_X64_config) ]; then
+        if [ -n "$(diff -q new_all_X64_config all_X64_config)" ]; then
           rm -f all_X64_config diff_X64_config
           mv new_all_X64_config all_X64_config
           mv new_diff_X64_config diff_X64_config

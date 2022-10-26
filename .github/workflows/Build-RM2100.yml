@@ -77,7 +77,7 @@ jobs:
     - name: Update configs
       run: |
         cd ${MAIN_PATH}/configs
-        if [ -n $(diff -q new_all_RM2100_config all_RM2100_config) ]; then
+        if [ -n "$(diff -q new_all_RM2100_config all_RM2100_config)" ]; then
           rm -f all_RM2100_config diff_RM2100_config
           mv new_all_RM2100_config all_RM2100_config
           mv new_diff_RM2100_config diff_RM2100_config

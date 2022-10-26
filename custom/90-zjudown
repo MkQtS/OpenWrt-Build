@@ -1,14 +1,14 @@
 #!/bin/sh
 # Auto reconnect ZJU L2TP. Put it in /etc/hotplug.d/iface/
-([ ${INTERFACE} = "zju" ] && [ ${ACTION} = "ifdown" ]) || exit 0
+([ ${INTERFACE} = 'zju' ] && [ ${ACTION} = 'ifdown' ]) || exit 0
 # Don't disturb if there's no configured password
-[ -n $(uci get network.zju.password) ] || exit 0
+[ -n "$(uci -q get network.zju.password)" ] || exit 0
 
 CheckZJU() {
-    ZJU_DOWN="0"
+    ZJU_DOWN='0'
     # Only works when WAN DHCP is fine
     if (ifstatus wan | grep -q '"up": true') && (ifstatus zju | grep -q '"up": false'); then
-        ZJU_DOWN="1"
+        ZJU_DOWN='1'
     fi
     return ${ZJU_DOWN}
 }
@@ -21,7 +21,7 @@ MAXTRIALNUM=3
 CheckZJU; ZJU_DOWN=$?
 
 # Tries at most ${MAXTRIALNUM} times
-while [ ${ZJU_DOWN} = "1" ] && [ ${TrialCount} -lt ${MAXTRIALNUM} ]; do
+while [ ${ZJU_DOWN} = '1' ] && [ ${TrialCount} -lt ${MAXTRIALNUM} ]; do
     TrialCount=$(expr ${TrialCount} + 1)
     logger -p daemon.info -t zjudown "Start No.${TrialCount} trial..."
     ifup zju
