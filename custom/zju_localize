@@ -1,6 +1,5 @@
 #!/bin/sh
-
-[ $(uci get network.zju.proto) = "l2tp" ] && exit 0
+[ $(uci get network.zju.proto) = 'l2tp' ] && exit 0
 
 sed -i '1i #30 23 * * * poweroff' /etc/crontabs/root
 /etc/init.d/cron restart
@@ -13,7 +12,6 @@ uci -q batch << EOF
     set network.zju.mtu='1460'
     add_list firewall.@zone[1].network='zju'
 EOF
-
 uci commit && reload_config
 
 exit 0

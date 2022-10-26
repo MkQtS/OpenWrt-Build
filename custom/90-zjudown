@@ -14,7 +14,7 @@ CheckZJU() {
 }
 
 # Wait enough time in case of the chaos at boot
-logger -t zjudown "ZJU L2TP seems down, wait for 20 seconds..."
+logger -p daemon.warn -t zjudown "ZJU L2TP seems down, wait for 20 seconds..."
 sleep 20
 TrialCount=0
 MAXTRIALNUM=3
@@ -23,19 +23,19 @@ CheckZJU; ZJU_DOWN=$?
 # Tries at most ${MAXTRIALNUM} times
 while [ ${ZJU_DOWN} = "1" ] && [ ${TrialCount} -lt ${MAXTRIALNUM} ]; do
     TrialCount=$(expr ${TrialCount} + 1)
-    logger -t zjudown "Start No.${TrialCount} trial..."
+    logger -p daemon.info -t zjudown "Start No.${TrialCount} trial..."
     ifup zju
-    logger -t zjudown "Wait for 15 seconds..."
+    logger -p daemon.info -t zjudown "Wait for 15 seconds..."
     sleep 15
     CheckZJU; ZJU_DOWN=$?
 done
 
 if [ ${TrialCount} -ge ${MAXTRIALNUM} ]; then
-    logger -t zjudown "All ${TrialCount} trials failed. Stop working."
+    logger -p daemon.warn -t zjudown "All ${TrialCount} trials failed. Stop working."
 fi
 
 if [ ${ZJU_DOWN} = "0" ]; then
-    logger -t zjudown "ZJU L2TP is working now."
+    logger -p daemon.warn -t zjudown "ZJU L2TP is working now."
 fi
 
 exit 0

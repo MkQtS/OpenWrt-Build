@@ -86,11 +86,10 @@ jobs:
         cp ./.config ${MAIN_PATH}/configs/new_all_X64_config
         sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/new_diff_X64_config
 
-    - name: Diff config
-      id: diff_config
+    - name: Update configs
       run: |
         cd ${MAIN_PATH}/configs
-        if [ "$(diff -q new_all_X64_config all_X64_config)" != "" ]; then
+        if [ -n $(diff -q new_all_X64_config all_X64_config) ]; then
           rm -f all_X64_config diff_X64_config
           mv new_all_X64_config all_X64_config
           mv new_diff_X64_config diff_X64_config
@@ -100,6 +99,7 @@ jobs:
           git add ${MAIN_PATH}/configs/all_X64_config ${MAIN_PATH}/configs/diff_X64_config
           git commit -m "Update config files"
           git push origin main
+          echo "New configs commited."
         else
           echo "Configs have not changed."
         fi
@@ -129,9 +129,9 @@ jobs:
         mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
         rm -rf ${OPENWRT_PATH}
         cd ${RELEASES_PATH}
-        du -h --max-depth=1
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
+        du -h --max-depth=1
 
     - name: Upload to Releases
       uses: ncipollo/release-action@v1

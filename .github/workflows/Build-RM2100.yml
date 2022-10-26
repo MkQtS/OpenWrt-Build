@@ -74,12 +74,10 @@ jobs:
         cp ./.config ${MAIN_PATH}/configs/new_all_RM2100_config
         sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/new_diff_RM2100_config
 
-    - name: Diff config
-      id: diff_config
+    - name: Update configs
       run: |
         cd ${MAIN_PATH}/configs
-        if [ "$(diff -q new_all_RM2100_config all_RM2100_config)" != "" ]
-        then
+        if [ -n $(diff -q new_all_RM2100_config all_RM2100_config) ]; then
           rm -f all_RM2100_config diff_RM2100_config
           mv new_all_RM2100_config all_RM2100_config
           mv new_diff_RM2100_config diff_RM2100_config
@@ -89,6 +87,7 @@ jobs:
           git add ${MAIN_PATH}/configs/all_RM2100_config ${MAIN_PATH}/configs/diff_RM2100_config
           git commit -m "Update config files"
           git push origin main
+          echo "New configs commited."
         else
           echo "Configs have not changed."
         fi
@@ -114,9 +113,9 @@ jobs:
         mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
         rm -rf ${OPENWRT_PATH}
         cd ${RELEASES_PATH}
-        du -h --max-depth=1
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
+        du -h --max-depth=1
 
     - name: Upload to releases
       uses: ncipollo/release-action@v1
