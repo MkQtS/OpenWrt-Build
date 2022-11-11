@@ -4,21 +4,22 @@
 # Don't disturb if there's no configured password
 [ -n "$(uci -q get network.zju.password)" ] || exit 0
 
+logger -p daemon.warn -t zjudown "ZJU L2TP seems down, wait for 20 seconds..."
+# Wait enough time in case of the chaos at boot
+sleep 20
+
 CheckZJU() {
     ZJU_DOWN='0'
-    # Only works when WAN DHCP is fine
     if (ifstatus wan | grep -q '"up": true') && (ifstatus zju | grep -q '"up": false'); then
+    # Only works when WAN DHCP is fine
         ZJU_DOWN='1'
     fi
     return ${ZJU_DOWN}
 }
 
-# Wait enough time in case of the chaos at boot
-logger -p daemon.warn -t zjudown "ZJU L2TP seems down, wait for 20 seconds..."
-sleep 20
-TrialCount=0
-MAXTRIALNUM=3
 CheckZJU; ZJU_DOWN=$?
+TrialCount=0
+MAXTRIALNUM=2
 
 # Tries at most ${MAXTRIALNUM} times
 while [ ${ZJU_DOWN} = '1' ] && [ ${TrialCount} -lt ${MAXTRIALNUM} ]; do

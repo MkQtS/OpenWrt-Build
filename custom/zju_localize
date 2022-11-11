@@ -1,4 +1,5 @@
 #!/bin/sh
+# The script can be placed in ./files/etc/uci-defaults/
 [ "$(uci -q get network.zju.proto)" = 'l2tp' ] && exit 0
 
 sed -i '1i #30 23 * * * poweroff' /etc/crontabs/root

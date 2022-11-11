@@ -5,7 +5,7 @@ on:
     - cron: 0 10 * * 6
   workflow_dispatch:
     inputs:
-      zju_localize:
+      zju_scripts:
         description: "Whether to add zju scripts"
         required: true
         default: "No"
@@ -39,9 +39,9 @@ jobs:
     - name: Set path
       run: |
         mkdir -p releases artifacts
-        echo "MAIN_PATH=$PWD" >> $GITHUB_ENV
-        echo "OPENWRT_PATH=$PWD/openwrt" >> $GITHUB_ENV
-        echo "RELEASES_PATH=$PWD/releases" >> $GITHUB_ENV
+        echo "MAIN_PATH=$(pwd)" >> $GITHUB_ENV
+        echo "OPENWRT_PATH=$(pwd)/openwrt" >> $GITHUB_ENV
+        echo "RELEASES_PATH=$(pwd)/releases" >> $GITHUB_ENV
 
     - name: Update & Install feeds
       run: |
@@ -72,12 +72,12 @@ jobs:
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
-        if [ ${{ inputs.zju_localize }}x != "No"x ]; then
+        if [ ${{ inputs.zju_scripts }}x != "No"x ]; then
           mkdir -p ./files/etc/uci-defaults/
           cp ${MAIN_PATH}/custom/zju_localize ./files/etc/uci-defaults/
           mkdir -p ./files/etc/hotplug.d/iface/
           cp ${MAIN_PATH}/custom/90-zjudown ./files/etc/hotplug.d/iface/
-          echo "Added localization for zju"
+          echo "Added scripts for zju"
         fi
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/custom/*.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
@@ -131,7 +131,6 @@ jobs:
         cd ${RELEASES_PATH}
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
-        du -h --max-depth=1
 
     - name: Upload to Releases
       uses: ncipollo/release-action@v1

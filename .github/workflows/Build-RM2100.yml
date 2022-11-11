@@ -30,9 +30,9 @@ jobs:
     - name: Set path
       run: |
         mkdir -p releases artifacts
-        echo "MAIN_PATH=$PWD" >> $GITHUB_ENV
-        echo "OPENWRT_PATH=$PWD/openwrt" >> $GITHUB_ENV
-        echo "RELEASES_PATH=$PWD/releases" >> $GITHUB_ENV
+        echo "MAIN_PATH=$(pwd)" >> $GITHUB_ENV
+        echo "OPENWRT_PATH=$(pwd)/openwrt" >> $GITHUB_ENV
+        echo "RELEASES_PATH=$(pwd)/releases" >> $GITHUB_ENV
 
     - name: Update & Install feeds
       run: |
@@ -115,7 +115,6 @@ jobs:
         cd ${RELEASES_PATH}
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
-        du -h --max-depth=1
 
     - name: Upload to releases
       uses: ncipollo/release-action@v1
