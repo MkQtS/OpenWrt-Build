@@ -79,8 +79,14 @@ jobs:
           cp ${MAIN_PATH}/custom/90-zjudown ./files/etc/hotplug.d/iface/
           echo "Added scripts for zju"
         fi
+        picct=0
+        for pic in ${MAIN_PATH}/custom/*.jpg; do
+          picct=$(expr ${picct} + 1)
+          mv ${pic} ${MAIN_PATH}/custom/${picct}.jpg
+        done
+        tgtpic=$(expr $(date +%s) % ${picct} + 1)
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-        cp ${MAIN_PATH}/custom/*.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+        cp ${MAIN_PATH}/custom/${tgtpic}.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/configs/X64_config ./.config
         make defconfig
         cp ./.config ${MAIN_PATH}/configs/new_all_X64_config
