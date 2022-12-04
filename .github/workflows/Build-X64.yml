@@ -23,7 +23,7 @@ jobs:
       run: |
         sudo swapoff -a
         sudo apt -yq update
-        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
+        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache clang clangd curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
         sudo apt -yq clean
 
     - name: Checkout repo
@@ -71,7 +71,7 @@ jobs:
         rm -f Packages.gz
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/ImmortalWrt 21.02 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/ImmortalWrt 21.02@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         if [ ${{ inputs.zju_scripts }}x != "No"x ]; then
           mkdir -p ./files/etc/uci-defaults/
           cp ${MAIN_PATH}/custom/zju_localize ./files/etc/uci-defaults/
@@ -85,6 +85,7 @@ jobs:
           mv ${pic} ${MAIN_PATH}/custom/${picct}.jpg
         done
         tgtpic=$(expr $(date +%s) % ${picct} + 1)
+        echo "Using No.${tgtpic} pic as default argon background."
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/custom/${tgtpic}.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/configs/X64_config ./.config

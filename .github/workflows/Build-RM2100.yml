@@ -14,7 +14,7 @@ jobs:
       run: |
         sudo swapoff -a
         sudo apt -yq update
-        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev zstd
+        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 clang clangd ccache curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig time uglifyjs unzip wget xsltproc zlib1g-dev zstd
         sudo apt -yq clean
 
     - name: Checkout repo
@@ -67,7 +67,7 @@ jobs:
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         # Add build date to release name
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/OpenWrt 22.03 @${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
+        sed -i "s/%D %V %C/OpenWrt 22.03@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         # Make .config
         cp ${MAIN_PATH}/configs/RM2100_config ./.config
         make defconfig
