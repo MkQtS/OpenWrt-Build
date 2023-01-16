@@ -22,9 +22,9 @@ jobs:
     - name: Initialize environment
       run: |
         sudo swapoff -a
-        sudo apt -yq update
-        sudo apt -yq install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache clang clangd curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc-s1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
-        sudo apt -yq clean
+        sudo apt-get -y update
+        sudo apt-get -y install asciidoc autoconf automake autopoint binutils build-essential bzip2 ccache clang clangd curl device-tree-compiler ecj fastjar file flex g++ g++-multilib gawk gcc gcc-multilib gettext git gperf java-propose-classpath lib32gcc-s1 libc6-dev-i386 libelf-dev libglib2.0-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool p7zip-full patch pkgconf python3 python3-pip python3-ply qemu-utils rsync scons squashfs-tools subversion swig tar time uglifyjs unzip wget xsltproc zlib1g-dev zstd
+        sudo apt-get -y clean
 
     - name: Checkout repo
       uses: actions/checkout@v3
@@ -65,7 +65,6 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         sed -i 's/192\.168\.1\.1/192\.168\.6\.1/g' ./package/base-files/files/bin/config_generate
-        sed -i 's/\${host:-openwrt\.org}/img\.alicdn\.com/g' ./feeds/luci/modules/luci-mod-network/root/etc/uci-defaults/50_luci-mod-admin-full
         wget -q https://downloads.immortalwrt.org/releases/21.02-SNAPSHOT/targets/x86/64/packages/Packages.gz
         zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
         rm -f Packages.gz
@@ -154,4 +153,3 @@ jobs:
         repository: ${{ github.repository }}
         retain_days: 3
         keep_minimum_runs: 1
-
