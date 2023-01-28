@@ -137,6 +137,8 @@ jobs:
         cd ${RELEASES_PATH}
         tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
+        echo "sha256sums is:"
+        cat {RELEASES_PATH}/sha256sums
 
     - name: Upload to Releases
       uses: ncipollo/release-action@v1
