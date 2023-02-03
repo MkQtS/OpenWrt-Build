@@ -1,17 +1,16 @@
 #!/bin/sh
-# The script can be executed as uci-defaults
 [ "$(uci -q get network.zju.proto)" = 'l2tp' ] && exit 0
-
+# The script can be executed as uci-defaults
 sed -i '1i #30 23 * * * poweroff' /etc/crontabs/root
 /etc/init.d/cron restart
 
 uci -q batch << EOF
-    set dhcp.@dnsmasq[0].rebind_protection='0'
-    set network.zju=interface
-    set network.zju.proto='l2tp'
-    set network.zju.server='lns.zju.edu.cn'
-    set network.zju.mtu='1460'
-    add_list firewall.@zone[1].network='zju'
+	set dhcp.@dnsmasq[0].rebind_protection='0'
+	set network.zju=interface
+	set network.zju.proto='l2tp'
+	set network.zju.server='lns.zju.edu.cn'
+	set network.zju.mtu='1460'
+	add_list firewall.@zone[1].network='zju'
 EOF
 uci commit && reload_config
 
