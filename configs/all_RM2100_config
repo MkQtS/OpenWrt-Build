@@ -4470,7 +4470,7 @@ CONFIG_LUCI_CSSTIDY=y
 # CONFIG_LUCI_LANG_da is not set
 # CONFIG_LUCI_LANG_de is not set
 # CONFIG_LUCI_LANG_el is not set
-# CONFIG_LUCI_LANG_en is not set
+CONFIG_LUCI_LANG_en=y
 # CONFIG_LUCI_LANG_es is not set
 # CONFIG_LUCI_LANG_fi is not set
 # CONFIG_LUCI_LANG_fr is not set
@@ -4669,7 +4669,7 @@ CONFIG_PACKAGE_luci-lib-nixio_notls=y
 # CONFIG_PACKAGE_luci-i18n-base-da is not set
 # CONFIG_PACKAGE_luci-i18n-base-de is not set
 # CONFIG_PACKAGE_luci-i18n-base-el is not set
-# CONFIG_PACKAGE_luci-i18n-base-en is not set
+CONFIG_PACKAGE_luci-i18n-base-en=y
 # CONFIG_PACKAGE_luci-i18n-base-es is not set
 # CONFIG_PACKAGE_luci-i18n-base-fi is not set
 # CONFIG_PACKAGE_luci-i18n-base-fr is not set
@@ -4703,7 +4703,7 @@ CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-firewall-da is not set
 # CONFIG_PACKAGE_luci-i18n-firewall-de is not set
 # CONFIG_PACKAGE_luci-i18n-firewall-el is not set
-# CONFIG_PACKAGE_luci-i18n-firewall-en is not set
+CONFIG_PACKAGE_luci-i18n-firewall-en=y
 # CONFIG_PACKAGE_luci-i18n-firewall-es is not set
 # CONFIG_PACKAGE_luci-i18n-firewall-fi is not set
 # CONFIG_PACKAGE_luci-i18n-firewall-fr is not set
@@ -4737,7 +4737,7 @@ CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-opkg-da is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-de is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-el is not set
-# CONFIG_PACKAGE_luci-i18n-opkg-en is not set
+CONFIG_PACKAGE_luci-i18n-opkg-en=y
 # CONFIG_PACKAGE_luci-i18n-opkg-es is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-fi is not set
 # CONFIG_PACKAGE_luci-i18n-opkg-fr is not set
@@ -4770,7 +4770,7 @@ CONFIG_PACKAGE_luci-i18n-opkg-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-sqm-da is not set
 # CONFIG_PACKAGE_luci-i18n-sqm-de is not set
 # CONFIG_PACKAGE_luci-i18n-sqm-el is not set
-# CONFIG_PACKAGE_luci-i18n-sqm-en is not set
+CONFIG_PACKAGE_luci-i18n-sqm-en=y
 # CONFIG_PACKAGE_luci-i18n-sqm-es is not set
 # CONFIG_PACKAGE_luci-i18n-sqm-fi is not set
 # CONFIG_PACKAGE_luci-i18n-sqm-fr is not set
@@ -4803,7 +4803,7 @@ CONFIG_PACKAGE_luci-i18n-sqm-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-watchcat-da is not set
 # CONFIG_PACKAGE_luci-i18n-watchcat-de is not set
 # CONFIG_PACKAGE_luci-i18n-watchcat-el is not set
-# CONFIG_PACKAGE_luci-i18n-watchcat-en is not set
+CONFIG_PACKAGE_luci-i18n-watchcat-en=y
 # CONFIG_PACKAGE_luci-i18n-watchcat-es is not set
 # CONFIG_PACKAGE_luci-i18n-watchcat-fi is not set
 # CONFIG_PACKAGE_luci-i18n-watchcat-fr is not set
@@ -4836,7 +4836,7 @@ CONFIG_PACKAGE_luci-i18n-watchcat-zh-cn=y
 # CONFIG_PACKAGE_luci-i18n-wifischedule-da is not set
 # CONFIG_PACKAGE_luci-i18n-wifischedule-de is not set
 # CONFIG_PACKAGE_luci-i18n-wifischedule-el is not set
-# CONFIG_PACKAGE_luci-i18n-wifischedule-en is not set
+CONFIG_PACKAGE_luci-i18n-wifischedule-en=y
 # CONFIG_PACKAGE_luci-i18n-wifischedule-es is not set
 # CONFIG_PACKAGE_luci-i18n-wifischedule-fi is not set
 # CONFIG_PACKAGE_luci-i18n-wifischedule-fr is not set
