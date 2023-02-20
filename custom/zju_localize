@@ -10,6 +10,8 @@ uci -q batch << EOF
 	set network.zju.proto='l2tp'
 	set network.zju.server='lns.zju.edu.cn'
 	set network.zju.mtu='1460'
+	set network.zju.checkup_interval='30'
+	set network.zju.keepalive='3'
 	add_list firewall.@zone[1].network='zju'
 EOF
 uci commit && reload_config

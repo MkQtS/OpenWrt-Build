@@ -5,8 +5,8 @@ on:
     - cron: 0 10 * * 6
   workflow_dispatch:
     inputs:
-      zju_scripts:
-        description: "Whether to add zju scripts"
+      zju_script:
+        description: "Whether to add zju localizing script"
         required: true
         default: "No"
         type: choice
@@ -71,12 +71,10 @@ jobs:
         sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
-        if [ ${{ inputs.zju_scripts }}x != "No"x ]; then
+        if [ ${{ inputs.zju_script }}x != "No"x ]; then
           mkdir -p ./files/etc/uci-defaults/
           cp ${MAIN_PATH}/custom/zju_localize ./files/etc/uci-defaults/
-          mkdir -p ./files/etc/hotplug.d/iface/
-          cp ${MAIN_PATH}/custom/90-zjudown ./files/etc/hotplug.d/iface/
-          echo "Added scripts for zju"
+          echo "Added script for zju."
         fi
         picct=0
         for pic in ${MAIN_PATH}/custom/*.jpg; do
