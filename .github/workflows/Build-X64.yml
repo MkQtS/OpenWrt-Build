@@ -93,7 +93,7 @@ jobs:
         make defconfig
         cp ./.config ${MAIN_PATH}/configs/X64-21.02/new_all_config
         sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/new_diff_config
-        cd ${MAIN_PATH}/configsX64-21.02/
+        cd ${MAIN_PATH}/configs/X64-21.02/
         if [ -n "$(diff -q new_all_config all_config)" ]; then
           rm -f all_config diff_config
           mv new_all_config all_config
