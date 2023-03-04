@@ -1,4 +1,4 @@
-name: Build RM-AC2100
+name: Build RM-AC2100 22.03
 
 on:
   schedule:
