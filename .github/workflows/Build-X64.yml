@@ -65,10 +65,10 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         sed -i 's/192\.168\.1\.1/192\.168\.6\.1/g' ./package/base-files/files/bin/config_generate
-        wget -q https://downloads.immortalwrt.org/releases/21.02-SNAPSHOT/targets/x86/64/packages/Packages.gz
-        zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
-        rm -f Packages.gz
-        sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
+        #wget -q https://downloads.immortalwrt.org/releases/21.02-SNAPSHOT/targets/x86/64/packages/Packages.gz
+        #zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
+        #rm -f Packages.gz
+        #sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         if [ ${{ inputs.zju_script }}x != "No"x ]; then
@@ -85,23 +85,24 @@ jobs:
         echo "Using No.${tgtpic} pic as default argon background."
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/custom/${tgtpic}.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-        cp ${MAIN_PATH}/configs/X64_config ./.config
-        make defconfig
-        cp ./.config ${MAIN_PATH}/configs/new_all_X64_config
-        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/new_diff_X64_config
 
-    - name: Update configs
+    - name: Generate and update configs
       run: |
-        cd ${MAIN_PATH}/configs
-        if [ -n "$(diff -q new_all_X64_config all_X64_config)" ]; then
-          rm -f all_X64_config diff_X64_config
-          mv new_all_X64_config all_X64_config
-          mv new_diff_X64_config diff_X64_config
+        cd ${OPENWRT_PATH}
+        cat ${MAIN_PATH}/configs/X64-21.02/myConfig > ./.config
+        make defconfig
+        cp ./.config ${MAIN_PATH}/configs/X64-21.02/new_all_config
+        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/new_diff_config
+        cd ${MAIN_PATH}/configsX64-21.02/
+        if [ -n "$(diff -q new_all_config all_config)" ]; then
+          rm -f all_config diff_config
+          mv new_all_config all_config
+          mv new_diff_config diff_config
           cd ${MAIN_PATH}
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add ${MAIN_PATH}/configs/all_X64_config ${MAIN_PATH}/configs/diff_X64_config
-          git commit -m "Update config files"
+          git add ${MAIN_PATH}/configs/X64-21.02/all_config ${MAIN_PATH}/configs/X64-21.02/diff_config
+          git commit -m "Update X64-21.02 config files"
           git push origin main
           echo "New configs commited."
         else
@@ -120,6 +121,7 @@ jobs:
         fi
 
     - name: Delete old release
+      continue-on-error: true
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
       with:
         delete_release: true

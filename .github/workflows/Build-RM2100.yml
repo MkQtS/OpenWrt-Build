@@ -56,32 +56,32 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         # Use aliyun mirror
-        sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
-        wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
-        zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
-        rm -f Packages.gz
-        sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
+        #sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
+        #wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
+        #zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
+        #rm -f Packages.gz
+        #sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         # Add build date to release name
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/OpenWrt 22.03@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
-        # Make .config
-        cp ${MAIN_PATH}/configs/RM2100_config ./.config
-        make defconfig
-        cp ./.config ${MAIN_PATH}/configs/new_all_RM2100_config
-        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/new_diff_RM2100_config
 
-    - name: Update configs
+    - name: Generate and update configs
       run: |
-        cd ${MAIN_PATH}/configs
-        if [ -n "$(diff -q new_all_RM2100_config all_RM2100_config)" ]; then
-          rm -f all_RM2100_config diff_RM2100_config
-          mv new_all_RM2100_config all_RM2100_config
-          mv new_diff_RM2100_config diff_RM2100_config
+        cd ${OPENWRT_PATH}
+        cat ${MAIN_PATH}/configs/RM21-22.03/myConfig > ./.config
+        make defconfig
+        cp ./.config ${MAIN_PATH}/configs/RM21-22.03/new_all_config
+        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/RM21-22.03/new_diff_config
+        cd ${MAIN_PATH}/configs/RM21-22.03/
+        if [ -n "$(diff -q new_all_config all_config)" ]; then
+          rm -f all_config diff_config
+          mv new_all_config all_config
+          mv new_diff_config diff_config
           cd ${MAIN_PATH}
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git add ${MAIN_PATH}/configs/all_RM2100_config ${MAIN_PATH}/configs/diff_RM2100_config
-          git commit -m "Update config files"
+          git add ${MAIN_PATH}/configs/RM21-22.03/all_config ${MAIN_PATH}/configs/RM21-22.03/diff_config
+          git commit -m "Update RM21-22.03 config files"
           git push origin main
           echo "New configs commited."
         else
@@ -96,6 +96,7 @@ jobs:
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
 
     - name: Delete old release
+      continue-on-error: true
       uses: dev-drprasad/delete-tag-and-release@v0.2.0
       with:
         delete_release: true
