@@ -28,6 +28,8 @@ jobs:
 
     - name: Checkout repo
       uses: actions/checkout@v3
+      with:
+        ref: main
 
     - name: Get source code
       uses: actions/checkout@v3
