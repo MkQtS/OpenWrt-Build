@@ -27,6 +27,8 @@ CONFIG_PACKAGE_xl2tpd=y
 CONFIG_PACKAGE_zstd=y
 
 CONFIG_PACKAGE_kmod-nls-base=y
+CONFIG_PACKAGE_kmod-i40e=n
+CONFIG_PACKAGE_kmod-i40e-vendor=n
 CONFIG_PACKAGE_kmod-usb-core=y
 CONFIG_PACKAGE_kmod-usb-net=y
 CONFIG_PACKAGE_kmod-usb-storage=y
