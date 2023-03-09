@@ -73,7 +73,7 @@ jobs:
         #sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
         BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
         sed -i "s/%D %V %C/ImmortalWrt 21.02@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
-        if [ ${{ inputs.zju_script }}x != "No"x ]; then
+        if [ ${{ inputs.zju_script }}x != "Nox" ]; then
           mkdir -p ./files/etc/uci-defaults/
           cp ${MAIN_PATH}/custom/zju_localize ./files/etc/uci-defaults/
           echo "Added script for zju."
@@ -116,7 +116,7 @@ jobs:
         cd ${OPENWRT_PATH}
         echo "Using $(($(nproc)+1)) threads to compile..."
         make download world -j $(($(nproc)+1)) || make download world -j1 V=s
-        if [ ${{ inputs.zju_localize }}x != "No"x ]; then
+        if [ ${{ inputs.zju_script }}x != "Nox" ]; then
           echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localization" >> $GITHUB_ENV
         else
           echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), without zju localization" >> $GITHUB_ENV
