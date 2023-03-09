@@ -94,7 +94,7 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         echo "Using $(($(nproc)+1)) threads to compile..."
-        make -j $(($(nproc)+1)) download world
+        make download world -j $(($(nproc)+1)) || make download world -j1 V=s
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
 
     - name: Delete old release
