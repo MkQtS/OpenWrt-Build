@@ -110,6 +110,13 @@ jobs:
     - name: Build firmware
       run: |
         cd ${OPENWRT_PATH}
+        # build po2lmo
+        cp -r ./feeds/luci/modules/luci-base/src/ "po2lmo"
+        pushd "po2lmo"
+        make po2lmo
+        rm -rf "/usr/bin/po2lmo"
+        cp -fp "po2lmo" "/usr/bin/po2lmo"
+        popd
         echo "Using $(($(nproc)+1)) threads to compile..."
         make download world -j $(($(nproc)+1)) || make download world -j1 V=s
         if [ ${{ inputs.zju_script }}x != "Nox" ]; then
