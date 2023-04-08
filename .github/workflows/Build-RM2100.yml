@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Initialize environment
+    - name: Initialize
       run: |
         sudo swapoff -a
         sudo apt-get -y update
@@ -36,23 +36,19 @@ jobs:
         echo "OPENWRT_PATH=$(pwd)/openwrt" >> $GITHUB_ENV
         echo "RELEASES_PATH=$(pwd)/releases" >> $GITHUB_ENV
 
-    - name: Update & Install feeds
+    - name: Get feeds and dl
       run: |
         cd ${OPENWRT_PATH}
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-
-    - name: Restore dl files
-      run: |
-        cd ${OPENWRT_PATH}
-        wget -q https://github.com/$GITHUB_REPOSITORY/releases/download/latest-rm2100/dl_cache.tar.zst || dlCacheState="notExist"
+        wget -q https://github.com/$${GITHUB_REPOSITORY}/releases/download/latest-rm2100/dl_cache.tar.zst || dlCacheState="notExist"
         if [ ${dlCacheState}x = "notExist"x ]; then
           echo "dl cache does not exist."
         else
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
           echo "dl cache restored."
-          du -h --max-depth=1
         fi
+        du -h --max-depth=1
 
     - name: Customize
       run: |
@@ -96,6 +92,7 @@ jobs:
         echo "Using $(($(nproc)+1)) threads to compile..."
         make download world -j $(($(nproc)+1)) || make download world -j1 V=s
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
+        du -h --max-depth=1
 
     - name: Delete old release
       continue-on-error: true

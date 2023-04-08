@@ -1,5 +1,5 @@
 #!/bin/sh
-[ "$(uci -q get network.zju.proto)" = 'l2tp' ] && exit 0
+[ $(uci -q get network.zju.proto)_proto = 'l2tp_proto' ] && exit 0
 # The script can be executed as uci-defaults
 sed -i '1i #30 23 * * * poweroff' /etc/crontabs/root
 /etc/init.d/cron restart
