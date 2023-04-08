@@ -50,7 +50,7 @@ jobs:
         cd ${OPENWRT_PATH}
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        wget -q https://github.com/$${GITHUB_REPOSITORY}/releases/download/latest-x64/dl_cache.tar.zst || dlCacheState="notExist"
+        wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64/dl_cache.tar.zst || dlCacheState="notExist"
         if [ ${dlCacheState}x = "notExist"x ]; then
           echo "dl cache does not exist."
         else
