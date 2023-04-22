@@ -11,6 +11,8 @@ jobs:
 
     steps:
     - name: Initialize
+      env:
+        DEBIAN_FRONTEND: noninteractive
       run: |
         sudo swapoff -a
         sudo apt-get -y update
