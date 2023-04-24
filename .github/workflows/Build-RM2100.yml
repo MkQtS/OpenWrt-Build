@@ -1,8 +1,8 @@
 name: Build RM-AC2100 22.03
 
 on:
-  schedule:
-    - cron: 0 8 * * 6
+  #schedule:
+  #  - cron: 0 8 * * 6
   workflow_dispatch:
 
 jobs:
