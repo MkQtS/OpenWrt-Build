@@ -133,11 +133,13 @@ jobs:
 
     - name: Manage releases and artifacts
       run: |
+        rm -rf ${OPENWRT_PATH}/bin/targets/x86/64/packages
         mv ${OPENWRT_PATH}/bin/targets/x86/64/* ${RELEASES_PATH}
+        cd ${OPENWRT_PATH}
+        make clean
         mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
         rm -rf ${OPENWRT_PATH}
         cd ${RELEASES_PATH}
-        tar -czf packages.tgz ./packages --remove-files
         tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
         echo "sha256sums is:"
         cat ${RELEASES_PATH}/sha256sums
