@@ -1,0 +1,22 @@
+From 570da5369e68886d5e4c06b91ff217f94dd7fb7a Mon Sep 17 00:00:00 2001
+From: somebody <no@thankyou.com>
+Date: Sat, 3 Jun 2023 18:00:00 +0800
+Subject: [PATCH] Add compilation date
+
+---
+ modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js b/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
+index 8e710ef..91d8259 100644
+--- a/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
++++ b/modules/luci-mod-status/htdocs/luci-static/resources/view/status/include/10_system.js
+@@ -83,7 +83,7 @@ return baseclass.extend({
+ 			_('Model'),            boardinfo.model + cpubench.cpubench,
+ 			_('Architecture'),     cpuinfo.cpuinfo || boardinfo.system,
+ 			_('Target Platform'),  (L.isObject(boardinfo.release) ? boardinfo.release.target : ''),
+-			_('Firmware Version'), (L.isObject(boardinfo.release) ? boardinfo.release.description + ' / ' : '') + (luciversion || ''),
++			_('Firmware Version'), (L.isObject(boardinfo.release) ? boardinfo.release.description + ' / ' : '') + (luciversion ? (luciversion + ' / ') : '') + ('Compiled on BUILD_DATE'),
+ 			_('Kernel Version'),   boardinfo.kernel,
+ 			_('Local Time'),       datestr,
+ 			_('Uptime'),           systeminfo.uptime ? '%t'.format(systeminfo.uptime) : null,

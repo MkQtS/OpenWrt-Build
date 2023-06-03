@@ -2,7 +2,7 @@ name: Build X86-64 21.02
 
 on:
   schedule:
-    - cron: 0 6 * * 6
+    - cron: 0 10 * * 6
   workflow_dispatch:
     inputs:
       zju_script:
@@ -40,12 +40,14 @@ jobs:
         ref: openwrt-21.02
         path: 'openwrt'
 
-    - name: Set path
+    - name: Set environment
       run: |
         mkdir -p releases artifacts
         echo "MAIN_PATH=$(pwd)" >> $GITHUB_ENV
         echo "OPENWRT_PATH=$(pwd)/openwrt" >> $GITHUB_ENV
         echo "RELEASES_PATH=$(pwd)/releases" >> $GITHUB_ENV
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
 
     - name: Get feeds and dl
       run: |
@@ -60,16 +62,17 @@ jobs:
           echo "dl cache restored."
         fi
 
-    - name: Update xl2tpd
+    - name: Apply patches
+      continue-on-error: true
       run: |
-        cd ${MAIN_PATH}
-        wget -O ./xl2tpd1.patch https://github.com/immortalwrt/packages/commit/be95ccbc8c0eea9a8e27e813bf0c5c4119ebde09.patch
-        wget -O ./xl2tpd2.patch https://github.com/immortalwrt/packages/commit/a111405eac397f4a48492e9d710cea3aeb9092c3.patch
+        # Update xl2tpd
         cd ${OPENWRT_PATH}/feeds/packages
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git am ${MAIN_PATH}/xl2tpd1.patch
-        git am ${MAIN_PATH}/xl2tpd2.patch
+        git am ${MAIN_PATH}/patches/xl2tpd1.patch
+        git am ${MAIN_PATH}/patches/xl2tpd2.patch
+        # Add compilation date
+        cd ${OPENWRT_PATH}/feeds/luci
+        sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
+        git am ${MAIN_PATH}/patches/Add-compilation-date.patch
 
     - name: Customize
       run: |
@@ -81,8 +84,6 @@ jobs:
         #zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
         #rm -f Packages.gz
         #sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
-        BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/ImmortalWrt 21.02@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         if [ ${{ inputs.zju_script }}x = "Addx" ]; then
           mkdir -p ./files/etc/uci-defaults/
           cp ${MAIN_PATH}/custom/zju_localize ./files/etc/uci-defaults/
@@ -111,8 +112,6 @@ jobs:
           mv new_all_config all_config
           mv new_diff_config diff_config
           cd ${MAIN_PATH}
-          git config user.name github-actions
-          git config user.email github-actions@github.com
           git add ${MAIN_PATH}/configs/X64-21.02/all_config ${MAIN_PATH}/configs/X64-21.02/diff_config
           git commit -m "Update X64-21.02 config files"
           git push origin main

@@ -52,18 +52,14 @@ jobs:
         fi
         du -h --max-depth=1
 
-    - name: Customize
-      run: |
-        cd ${OPENWRT_PATH}
-        # Use aliyun mirror
-        #sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
-        #wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
-        #zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
-        #rm -f Packages.gz
-        #sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
-        # Add build date to release name
-        BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/OpenWrt 22.03@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
+    #- name: Use aliyun mirror
+    #  run: |
+    #    cd ${OPENWRT_PATH}
+    #    sed -i 's/downloads\.openwrt\.org/mirrors\.aliyun\.com\/openwrt/' ./include/version.mk
+    #    wget -q https://mirrors.aliyun.com/openwrt/releases/22.03-SNAPSHOT/targets/ramips/mt7621/packages/Packages.gz
+    #    zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
+    #    rm -f Packages.gz
+    #    sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
 
     - name: Generate and update configs
       run: |
