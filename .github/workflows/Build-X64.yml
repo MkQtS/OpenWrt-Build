@@ -2,7 +2,7 @@ name: Build X86-64 21.02
 
 on:
   schedule:
-    - cron: 0 10 * * 6
+    - cron: 0 6 * * 6
   workflow_dispatch:
     inputs:
       zju_script:
@@ -46,6 +46,17 @@ jobs:
         echo "MAIN_PATH=$(pwd)" >> $GITHUB_ENV
         echo "OPENWRT_PATH=$(pwd)/openwrt" >> $GITHUB_ENV
         echo "RELEASES_PATH=$(pwd)/releases" >> $GITHUB_ENV
+
+    - name: Update xl2tpd
+      run: |
+        cd ${MAIN_PATH}
+        wget -O ./xl2tpd1.patch https://github.com/immortalwrt/packages/commit/be95ccbc8c0eea9a8e27e813bf0c5c4119ebde09.patch
+        wget -O ./xl2tpd2.patch https://github.com/immortalwrt/packages/commit/a111405eac397f4a48492e9d710cea3aeb9092c3.patch
+        cd ${OPENWRT_PATH}
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git am ../xl2tpd1.patch
+        git am ../xl2tpd2.patch
 
     - name: Get feeds and dl
       run: |
