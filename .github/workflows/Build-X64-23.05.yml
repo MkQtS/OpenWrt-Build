@@ -1,6 +1,8 @@
 name: Build X86-64 23.05
 
 on:
+  schedule:
+    - cron: 0 10 * * 6
   workflow_dispatch:
 
 jobs:
@@ -29,12 +31,14 @@ jobs:
         ref: openwrt-23.05
         path: 'openwrt'
 
-    - name: Set path
+    - name: Set environment
       run: |
         mkdir -p releases artifacts
         echo "MAIN_PATH=$(pwd)" >> $GITHUB_ENV
         echo "OPENWRT_PATH=$(pwd)/openwrt" >> $GITHUB_ENV
         echo "RELEASES_PATH=$(pwd)/releases" >> $GITHUB_ENV
+        git config --global user.name "github-actions"
+        git config --global user.email "github-actions@github.com"
 
     - name: Get feeds and dl
       run: |
@@ -49,14 +53,20 @@ jobs:
           echo "dl cache restored."
         fi
 
+    - name: Apply patches
+      continue-on-error: true
+      run: |
+        # Add compilation date
+        cd ${OPENWRT_PATH}/feeds/luci
+        sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
+        git am ${MAIN_PATH}/patches/Add-compilation-date.patch
+
     - name: Customize
       run: |
         cd ${OPENWRT_PATH}
         du -h --max-depth=1
         sed -i 's/Os/O2/g' ./include/target.mk
         sed -i 's/192\.168\.1\.1/192\.168\.13\.1/g' ./package/base-files/files/bin/config_generate
-        BUILD_DATE=$(date -d "8 hour" -u +%Y-%m-%d)
-        sed -i "s/%D %V %C/ImmortalWrt@${BUILD_DATE}/g" ./package/base-files/files/etc/openwrt_release
         picct=0
         for pic in ${MAIN_PATH}/custom/*.jpg; do
           picct=$(expr ${picct} + 1)
@@ -80,8 +90,6 @@ jobs:
           mv new_all_config all_config
           mv new_diff_config diff_config
           cd ${MAIN_PATH}
-          git config user.name github-actions
-          git config user.email github-actions@github.com
           git add ${MAIN_PATH}/configs/X64-23.05/all_config ${MAIN_PATH}/configs/X64-23.05/diff_config
           git commit -m "Update X64-23.05 config files"
           git push origin main

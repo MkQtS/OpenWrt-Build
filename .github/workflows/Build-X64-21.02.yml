@@ -1,18 +1,7 @@
 name: Build X86-64 21.02
 
 on:
-  schedule:
-    - cron: 0 10 * * 6
   workflow_dispatch:
-    inputs:
-      zju_script:
-        description: "Whether to add zju localizing script"
-        required: true
-        default: "No"
-        type: choice
-        options:
-        - "Add"
-        - "No"
 
 jobs:
   build:
@@ -52,9 +41,10 @@ jobs:
     - name: Get feeds and dl
       run: |
         cd ${OPENWRT_PATH}
+        sed -i 's/src-git-full/src-git/g' ./feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64/dl_cache.tar.zst || dlCacheState="notExist"
+        wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64-21.02/dl_cache.tar.zst || dlCacheState="notExist"
         if [ ${dlCacheState}x = "notExist"x ]; then
           echo "dl cache does not exist."
         else
@@ -69,10 +59,6 @@ jobs:
         cd ${OPENWRT_PATH}/feeds/packages
         git am ${MAIN_PATH}/patches/xl2tpd1.patch
         git am ${MAIN_PATH}/patches/xl2tpd2.patch
-        # Add compilation date
-        cd ${OPENWRT_PATH}/feeds/luci
-        sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
-        git am ${MAIN_PATH}/patches/Add-compilation-date.patch
 
     - name: Customize
       run: |
@@ -84,11 +70,6 @@ jobs:
         #zgrep -m 1 "Depends: kernel (=.*)$" Packages.gz | sed 's/.*-\(.*\))/\1/' > .vermagic
         #rm -f Packages.gz
         #sed -i 's/^\(.\).*vermagic$/\1cp $(TOPDIR)\/.vermagic $(LINUX_DIR)\/.vermagic/' ./include/kernel-defaults.mk
-        if [ ${{ inputs.zju_script }}x = "Addx" ]; then
-          mkdir -p ./files/etc/uci-defaults/
-          cp ${MAIN_PATH}/custom/zju_localize ./files/etc/uci-defaults/
-          echo "Added script for zju."
-        fi
         picct=0
         for pic in ${MAIN_PATH}/custom/*.jpg; do
           picct=$(expr ${picct} + 1)
@@ -125,11 +106,7 @@ jobs:
         cd ${OPENWRT_PATH}
         echo "Using $(($(nproc)+1)) threads to compile..."
         make download world -j $(($(nproc)+1)) || make download world -j1 V=s
-        if [ ${{ inputs.zju_script }}x = "Addx" ]; then
-          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M"), with zju localization" >> $GITHUB_ENV
-        else
-          echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
-        fi
+        echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
         du -h --max-depth=1
 
     - name: Delete old release
@@ -137,7 +114,7 @@ jobs:
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
       with:
         delete_release: true
-        tag_name: latest-x64
+        tag_name: latest-x64-21.02
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -158,7 +135,7 @@ jobs:
       uses: ncipollo/release-action@v1
       with:
         name: latest x64 firmware
-        tag: latest-x64
+        tag: latest-x64-21.02
         artifacts: ${{ env.RELEASES_PATH }}/*
         body: ${{ env.RELEASE_BODY }}
 
