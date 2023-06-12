@@ -138,11 +138,3 @@ jobs:
         tag: latest-x64-21.02
         artifacts: ${{ env.RELEASES_PATH }}/*
         body: ${{ env.RELEASE_BODY }}
-
-    - name: Delete workflow runs
-      uses: Mattraks/delete-workflow-runs@v2
-      with:
-        token: ${{ github.token }}
-        repository: ${{ github.repository }}
-        retain_days: 3
-        keep_minimum_runs: 1
