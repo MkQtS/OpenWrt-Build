@@ -55,6 +55,10 @@ jobs:
     - name: Apply patches
       continue-on-error: true
       run: |
+        # Add compilation date
+        cd ${OPENWRT_PATH}/feeds/luci
+        sed -i -e "s/84/83/g" -e "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
+        git am ${MAIN_PATH}/patches/Add-compilation-date.patch
         # Update xl2tpd
         cd ${OPENWRT_PATH}/feeds/packages
         git am ${MAIN_PATH}/patches/xl2tpd1.patch
