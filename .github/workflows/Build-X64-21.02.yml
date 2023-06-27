@@ -41,7 +41,6 @@ jobs:
     - name: Get feeds and dl
       run: |
         cd ${OPENWRT_PATH}
-        sed -i 's/src-git-full/src-git/g' ./feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64-21.02/dl_cache.tar.zst || dlCacheState="notExist"

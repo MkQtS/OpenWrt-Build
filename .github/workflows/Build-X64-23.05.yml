@@ -101,14 +101,6 @@ jobs:
     - name: Build firmware
       run: |
         cd ${OPENWRT_PATH}
-        # build po2lmo
-        cp -r ./feeds/luci/modules/luci-base/src/ "po2lmo"
-        pushd "po2lmo"
-        make po2lmo
-        sudo rm -rf "/usr/bin/po2lmo"
-        sudo cp -fp "po2lmo" "/usr/bin/po2lmo"
-        echo "po2lmo built."
-        popd
         echo "Using $(($(nproc)+1)) threads to compile..."
         make download world -j $(($(nproc)+1)) || make download world -j1 V=s
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
