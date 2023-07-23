@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 20 17 * * 6
+    - cron: 10 4 * * 0
   workflow_dispatch:
 
 jobs:
@@ -69,6 +69,10 @@ jobs:
         sed -i '901s/n/y/' ./package/utils/busybox/Config-defaults.in
         echo 'busybox_unlink enabled'
         sed -i 's/192\.168\.1\.1/192\.168\.6\.1/g' ./package/base-files/files/bin/config_generate
+        mkdir -p ./files/etc/openclash/core/
+        wget -O ./clash_core.tar.gz https://github.com/vernesong/OpenClash/releases/download/Clash/clash-linux-amd64-v3.tar.gz && tar -zxf ./clash_core.tar.gz && rm -f ./clash_core.tar.gz
+        mv ./clash ./files/etc/openclash/core/ && chmod +x ./files/etc/openclash/core/clash
+        echo 'Clash core added.'
         picct=0
         for pic in ${MAIN_PATH}/custom/*.jpg; do
           picct=$(expr ${picct} + 1)
