@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 40 10 * * 1
+    - cron: 50 11 * * 1
   workflow_dispatch:
 
 jobs:
@@ -67,7 +67,7 @@ jobs:
         du -h --max-depth=1
         sed -i 's/Os/O2/g' ./include/target.mk
         sed -i '901s/n/y/' ./package/utils/busybox/Config-defaults.in
-        echo 'busybox_unlink enabled'
+        sed -i '269s/y/n/' ./package/base-files/image-config.in
         sed -i 's/192\.168\.1\.1/192\.168\.6\.1/g' ./package/base-files/files/bin/config_generate
         picct=0
         for pic in ${MAIN_PATH}/custom/*.jpg; do
