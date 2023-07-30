@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 50 11 * * 1
+    - cron: 0 7 * * 2
   workflow_dispatch:
 
 jobs:
