@@ -10,6 +10,7 @@ CONFIG_LUCI_LANG_en=y
 CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_LUCI_LANG_zh_Hant=y
 
+CONFIG_PACKAGE_adguardhome=y
 CONFIG_PACKAGE_autocore=y
 CONFIG_PACKAGE_coremark=y
 CONFIG_PACKAGE_curl=y
