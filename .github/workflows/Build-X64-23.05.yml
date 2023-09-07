@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 40 13 * * 4
+    - cron: 0 10 * * 6
   workflow_dispatch:
 
 jobs:
@@ -23,12 +23,12 @@ jobs:
         sudo apt-get -y clean
 
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: main
 
     - name: Get source code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: immortalwrt/immortalwrt
         ref: openwrt-23.05

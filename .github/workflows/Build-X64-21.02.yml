@@ -18,12 +18,12 @@ jobs:
         sudo apt-get -y clean
 
     - name: Checkout repo
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         ref: main
 
     - name: Get source code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: immortalwrt/immortalwrt
         ref: openwrt-21.02
