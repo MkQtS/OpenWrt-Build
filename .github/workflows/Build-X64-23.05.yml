@@ -20,7 +20,6 @@ jobs:
         large-packages: false
         swap-storage: true
         docker-images: true
-        tools-cache: true
 
     - name: Initialize
       env:
