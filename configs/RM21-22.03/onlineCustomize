@@ -1,3 +1,0 @@
-luci luci-i18n-base-zh-cn luci-theme-bootstrap curl dnsmasq-full nano tree wget-ssl
-luci-app-firewall luci-i18n-firewall-zh-cn luci-app-opkg luci-i18n-opkg-zh-cn
-luci-app-attendedsysupgrade luci-i18n-attendedsysupgrade-zh-cn luci-app-sqm luci-i18n-sqm-zh-cn
