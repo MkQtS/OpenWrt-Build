@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 45 14 * * 6
+    - cron: 15 9 * * 5
   workflow_dispatch:
 
 jobs:
@@ -53,6 +53,7 @@ jobs:
     - name: Get feeds and dl
       run: |
         cd ${OPENWRT_PATH}
+        sed -i 's,immortalwrt/packages,MkQtS/packages,' ./feeds.conf.default
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64-23.05/dl_cache.tar.zst || dlCacheState="notExist"
