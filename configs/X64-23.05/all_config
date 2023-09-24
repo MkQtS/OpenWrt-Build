@@ -3245,6 +3245,7 @@ CONFIG_NODEJS_NPM_CACHE_DIR=""
 # CONFIG_PACKAGE_node-fuse-bindings is not set
 # CONFIG_PACKAGE_node-gulp is not set
 # CONFIG_PACKAGE_node-gyp is not set
+# CONFIG_PACKAGE_node-gyp-build is not set
 # CONFIG_PACKAGE_node-hap-nodejs is not set
 # CONFIG_PACKAGE_node-hashmap is not set
 # CONFIG_PACKAGE_node-hid is not set
@@ -3278,6 +3279,7 @@ CONFIG_NODEJS_NPM_CACHE_DIR=""
 # CONFIG_PACKAGE_node-noble-device is not set
 # CONFIG_PACKAGE_node-npm is not set
 # CONFIG_PACKAGE_node-npm-check-updates is not set
+# CONFIG_PACKAGE_node-npm-run-all2 is not set
 # CONFIG_PACKAGE_node-onoff is not set
 # CONFIG_PACKAGE_node-openzwave-shared is not set
 # CONFIG_PACKAGE_node-pi-spi is not set
@@ -3301,6 +3303,7 @@ CONFIG_NODEJS_NPM_CACHE_DIR=""
 # CONFIG_PACKAGE_node-serialport-bindings is not set
 # CONFIG_PACKAGE_node-serialport-bindings-cpp is not set
 # CONFIG_PACKAGE_node-serialport-list is not set
+# CONFIG_PACKAGE_node-shx is not set
 # CONFIG_PACKAGE_node-sleep is not set
 # CONFIG_PACKAGE_node-socket.io is not set
 # CONFIG_PACKAGE_node-socket.io-client is not set
@@ -3318,6 +3321,7 @@ CONFIG_NODEJS_NPM_CACHE_DIR=""
 # CONFIG_PACKAGE_node-websocket is not set
 # CONFIG_PACKAGE_node-ws is not set
 # CONFIG_PACKAGE_node-yarn is not set
+# CONFIG_PACKAGE_node-zeromq is not set
 # CONFIG_PACKAGE_node-zigbee2mqtt is not set
 # CONFIG_PACKAGE_node-zwave-js is not set
 # CONFIG_PACKAGE_ts-node is not set
@@ -3591,7 +3595,6 @@ CONFIG_NODEJS_NPM_CACHE_DIR=""
 # Rust
 #
 # CONFIG_PACKAGE_maturin is not set
-# CONFIG_PACKAGE_rust is not set
 # end of Rust
 
 #
