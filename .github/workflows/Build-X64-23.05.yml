@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 0 10 * * 0
+    - cron: 13 20 * * 5
   workflow_dispatch:
 
 jobs:
@@ -70,6 +70,9 @@ jobs:
         cd ${OPENWRT_PATH}/feeds/luci
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
+        # Update AdGuard Home
+        cd ${OPENWRT_PATH}/feeds/packages
+        git am ${MAIN_PATH}/patches/Update-AdGuardHome.patch
 
     - name: Customize
       run: |
