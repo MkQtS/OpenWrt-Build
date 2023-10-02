@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 10 2 * * 6
+    - cron: 0 6 * * 1
   workflow_dispatch:
 
 jobs:
@@ -70,20 +70,27 @@ jobs:
         cd ${OPENWRT_PATH}/feeds/luci
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
-        # Update AdGuard Home
-        #cd ${OPENWRT_PATH}/feeds/packages
-        #git am ${MAIN_PATH}/patches/Update-AdGuardHome.patch
 
     - name: Customize
       run: |
+        # Use built latest AdGuardHome
+        mkdir -p ${OPENWRT_PATH}/files/
+        wget -q -O adgh.tar.gz "https://github.com/AdguardTeam/AdGuardHome/releases/latest/download/AdGuardHome_linux_amd64.tar.gz"
+        tar -xzf adgh.tar.gz
+        mv ./AdGuardHome/AdGuardHome ${OPENWRT_PATH}/files/usr/bin/AdGuardHome
+        rm -rf ./adgh.tar.gz ./AdGuardHome
+        mv ${MAIN_PATH}/custom/adghinit ${OPENWRT_PATH}/files/etc/init.d/adguardhome
+        sudo chmod 755 ${OPENWRT_PATH}/files/usr/bin/AdGuardHome ${OPENWRT_PATH}/files/etc/init.d/adguardhome
         cd ${OPENWRT_PATH}
-        du -h --max-depth=1
         # Change default cflags
         sed -i 's/Os/O2/g' ./include/target.mk
         # VERSION_CODE_FILENAMES
         sed -i '269s/y/n/' ./package/base-files/image-config.in
         # default lan ip
         sed -i 's/192\.168\.1\.1/192\.168\.6\.1/g' ./package/base-files/files/bin/config_generate
+        # busybox options: unlink, tree
+        sed -i '901s/default n/default y/' ./package/utils/busybox/Config-defaults.in
+        sed -i '2203s/default n/default y/' ./package/utils/busybox/Config-defaults.in
         picct=0
         for pic in ${MAIN_PATH}/custom/*.jpg; do
           picct=$(expr ${picct} + 1)
