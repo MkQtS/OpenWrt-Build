@@ -20,7 +20,10 @@ start_service() {
 	procd_append_param command -w "$WORK_DIR"
 	procd_append_param command -l "$LOG_FILE"
 	procd_append_param command --no-check-update
+	procd_set_param limits core="unlimited"
+	procd_set_param limits nofile="200000 200000"
 	procd_set_param stdout 1
 	procd_set_param stderr 1
 	procd_close_instance
+	logger -p daemon.warn -t adguardhome "AdGuardHome has been started."
 }
