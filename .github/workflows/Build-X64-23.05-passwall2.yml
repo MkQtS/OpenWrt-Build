@@ -1,8 +1,6 @@
-name: Build X86-64 23.05
+name: Build X86-64 23.05 with passwall2
 
 on:
-  schedule:
-    - cron: 0 9 * * 0
   workflow_dispatch:
 
 jobs:
@@ -41,6 +39,13 @@ jobs:
         ref: openwrt-23.05
         path: 'openwrt'
 
+    - name: Get passwall2 source
+      uses: actions/checkout@v4
+      with:
+        repository: xiaorouji/openwrt-passwall2
+        ref: main
+        path: 'passwall2'
+
     - name: Set environment
       run: |
         mkdir -p releases artifacts
@@ -54,7 +59,6 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         ./scripts/feeds update -a
-        ./scripts/feeds install -a
         wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64-23.05/dl_cache.tar.zst || dlCacheState="notExist"
         if [ ${dlCacheState}x = "notExist"x ]; then
           echo "dl cache does not exist."
@@ -70,6 +74,9 @@ jobs:
         cd ${OPENWRT_PATH}/feeds/luci
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
+        # Update passwall2 Makefile
+        cd ${MAIN_PATH}/passwall2
+        git am ${MAIN_PATH}/patches/Passwall2-Makefile.patch
 
     - name: Customize
       run: |
@@ -81,6 +88,8 @@ jobs:
         #rm -rf ./adgh.tar.gz ./AdGuardHome
         #mv ${MAIN_PATH}/custom/adghinit ${OPENWRT_PATH}/files/etc/init.d/adguardhome
         #sudo chmod 755 ${OPENWRT_PATH}/files/usr/bin/AdGuardHome ${OPENWRT_PATH}/files/etc/init.d/adguardhome
+        # Add passwall2
+        mv -r ${MAIN_PATH}/passwall2/luci-app-passwall2 ${OPENWRT_PATH}/feeds/luci/applications/
         cd ${OPENWRT_PATH}
         # Change default cflags
         sed -i 's/Os/O2/g' ./include/target.mk
@@ -101,22 +110,23 @@ jobs:
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/custom/${tgtpic}.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         sed -i '154s/Login/Log in/' ./feeds/luci/themes/luci-theme-argon/luasrc/view/themes/argon/sysauth.htm
+        ./scripts/feeds install -a
 
     - name: Generate and update configs
       run: |
         cd ${OPENWRT_PATH}
-        cat ${MAIN_PATH}/configs/X64-23.05/myConfig > ./.config
+        cat ${MAIN_PATH}/configs/psw2/myConfig > ./.config
         make defconfig
-        cp ./.config ${MAIN_PATH}/configs/X64-23.05/new_all_config
-        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/X64-23.05/new_diff_config
-        cd ${MAIN_PATH}/configs/X64-23.05/
+        cp ./.config ${MAIN_PATH}/configs/psw2/new_all_config
+        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/psw2/new_diff_config
+        cd ${MAIN_PATH}/configs/psw2/
         if [ -n "$(diff -q new_all_config all_config)" ]; then
           rm -f all_config diff_config
           mv new_all_config all_config
           mv new_diff_config diff_config
           cd ${MAIN_PATH}
-          git add ${MAIN_PATH}/configs/X64-23.05/all_config ${MAIN_PATH}/configs/X64-23.05/diff_config
-          git commit -m "Update X64-23.05 config files"
+          git add ${MAIN_PATH}/configs/psw2/all_config ${MAIN_PATH}/configs/psw2/diff_config
+          git commit -m "Update X64-23.05-psw2 config files"
           git push origin main
           echo "New configs commited."
         else
@@ -136,7 +146,7 @@ jobs:
       uses: dev-drprasad/delete-tag-and-release@v0.2.1
       with:
         delete_release: true
-        tag_name: latest-x64-23.05
+        tag_name: latest-x64-23.05-psw2
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -146,25 +156,15 @@ jobs:
         mv ${OPENWRT_PATH}/bin/targets/x86/64/* ${RELEASES_PATH}
         cd ${OPENWRT_PATH}
         make clean
-        mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
         rm -rf ${OPENWRT_PATH}
         cd ${RELEASES_PATH}
-        tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
         echo "sha256sums is:"
         cat ${RELEASES_PATH}/sha256sums
 
     - name: Upload to Releases
       uses: ncipollo/release-action@v1
       with:
-        name: latest 23.05 x64 firmware
-        tag: latest-x64-23.05
+        name: latest 23.05 x64 with passwall2 firmware
+        tag: latest-x64-23.05-psw2
         artifacts: ${{ env.RELEASES_PATH }}/*
         body: ${{ env.RELEASE_BODY }}
-
-    - name: Delete workflow runs
-      uses: Mattraks/delete-workflow-runs@v2
-      with:
-        token: ${{ github.token }}
-        repository: ${{ github.repository }}
-        retain_days: 3
-        keep_minimum_runs: 1

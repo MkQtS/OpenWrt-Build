@@ -1,0 +1,68 @@
+From 7f444243b412eb9cd7784dc62f01da68dcec7528 Mon Sep 17 00:00:00 2001
+From: somebody <no@thankyou.com>
+Date: Mon, 13 Nov 2023 15:40:58 +0800
+Subject: [PATCH] Update passwall2 Makefile
+
+---
+ Makefile.txt | 34 +++-------------------------------
+ 1 file changed, 3 insertions(+), 31 deletions(-)
+
+diff --git a/Makefile.txt b/Makefile.txt
+index 8eb425a..6f1be4f 100644
+--- a/Makefile.txt
++++ b/Makefile.txt
+@@ -9,8 +9,6 @@ PKG_VERSION:=1.21-3
+ PKG_RELEASE:=
+ 
+ PKG_CONFIG_DEPENDS:= \
+-	CONFIG_PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy \
+-	CONFIG_PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy \
+ 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Brook \
+ 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy \
+ 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria \
+@@ -31,8 +29,9 @@ LUCI_TITLE:=LuCI support for PassWall 2
+ LUCI_PKGARCH:=all
+ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
+ 	+ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc +resolveip +tcping \
+-	+xray-core +v2ray-geoip +v2ray-geosite \
+-	+unzip \
++	+xray-core +v2ray-geoip +v2ray-geosite +unzip \
++	+dnsmasq-full +dnsmasq_full_nftset +nftables \
++	+kmod-nft-socket +kmod-nft-tproxy +kmod-nft-nat \
+ 	+PACKAGE_$(PKG_NAME)_INCLUDE_Brook:brook \
+ 	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
+ 	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
+@@ -54,33 +53,6 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
+ define Package/$(PKG_NAME)/config
+ menu "Configuration"
+ 
+-config PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy
+-	bool "Iptables Transparent Proxy"
+-	select PACKAGE_dnsmasq-full
+-	select PACKAGE_dnsmasq_full_ipset
+-	select PACKAGE_ipset
+-	select PACKAGE_iptables
+-	select PACKAGE_iptables-nft
+-	select PACKAGE_iptables-zz-legacy
+-	select PACKAGE_iptables-mod-conntrack-extra
+-	select PACKAGE_iptables-mod-iprange
+-	select PACKAGE_iptables-mod-socket
+-	select PACKAGE_iptables-mod-tproxy
+-	select PACKAGE_kmod-ipt-nat
+-	depends on PACKAGE_$(PKG_NAME)
+-	default y if ! PACKAGE_firewall4
+-	
+-config PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy
+-	bool "Nftables Transparent Proxy"
+-	select PACKAGE_dnsmasq-full
+-	select PACKAGE_dnsmasq_full_nftset
+-	select PACKAGE_nftables
+-	select PACKAGE_kmod-nft-socket
+-	select PACKAGE_kmod-nft-tproxy
+-	select PACKAGE_kmod-nft-nat
+-	depends on PACKAGE_$(PKG_NAME)
+-	default y if PACKAGE_firewall4
+-
+ config PACKAGE_$(PKG_NAME)_INCLUDE_Brook
+ 	bool "Include Brook"
+ 	default n
