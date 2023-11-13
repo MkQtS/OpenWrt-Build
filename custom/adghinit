@@ -9,9 +9,7 @@ CONFIG_FILE="/etc/adguardhome.yaml"
 WORK_DIR="/usr/share/adguardhome"
 LOG_FILE="/var/log/adguardhome.log"
 
-# starts just after network starts to avoid some network race conditions
 START=25
-# stops before networking stops
 STOP=89
 
 start_service() {
@@ -20,7 +18,6 @@ start_service() {
 	procd_set_param command "$PROG" -c "$CONFIG_FILE"
 	procd_append_param command -w "$WORK_DIR"
 	procd_append_param command -l "$LOG_FILE"
-	procd_append_param command --no-check-update
 	procd_set_param limits core="unlimited"
 	procd_set_param limits nofile="200000 200000"
 	procd_set_param stdout 1
