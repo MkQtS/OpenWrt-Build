@@ -89,7 +89,7 @@ jobs:
         #mv ${MAIN_PATH}/custom/adghinit ${OPENWRT_PATH}/files/etc/init.d/adguardhome
         #sudo chmod 755 ${OPENWRT_PATH}/files/usr/bin/AdGuardHome ${OPENWRT_PATH}/files/etc/init.d/adguardhome
         # Add passwall2
-        mv -r ${MAIN_PATH}/passwall2/luci-app-passwall2 ${OPENWRT_PATH}/feeds/luci/applications/
+        mv ${MAIN_PATH}/passwall2/luci-app-passwall2 ${OPENWRT_PATH}/feeds/luci/applications/
         cd ${OPENWRT_PATH}
         # Change default cflags
         sed -i 's/Os/O2/g' ./include/target.mk
@@ -110,6 +110,7 @@ jobs:
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/custom/${tgtpic}.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         sed -i '154s/Login/Log in/' ./feeds/luci/themes/luci-theme-argon/luasrc/view/themes/argon/sysauth.htm
+        ./scripts/feeds update -a
         ./scripts/feeds install -a
 
     - name: Generate and update configs

@@ -4,35 +4,27 @@ Date: Mon, 13 Nov 2023 15:40:58 +0800
 Subject: [PATCH] Update passwall2 Makefile
 
 ---
- Makefile.txt | 34 +++-------------------------------
- 1 file changed, 3 insertions(+), 31 deletions(-)
+ luci-app-passwall2/Makefile | 31 ++-----------------------------
+ 1 file changed, 2 insertions(+), 29 deletions(-)
 
-diff --git a/Makefile.txt b/Makefile.txt
-index 8eb425a..6f1be4f 100644
---- a/Makefile.txt
-+++ b/Makefile.txt
-@@ -9,8 +9,6 @@ PKG_VERSION:=1.21-3
- PKG_RELEASE:=
+diff --git a/luci-app-passwall2/Makefile b/luci-app-passwall2/Makefile
+index 8eb425a..8fa9f76 100644
+--- a/luci-app-passwall2/Makefile
++++ b/luci-app-passwall2/Makefile
+@@ -29,10 +29,10 @@ PKG_CONFIG_DEPENDS:= \
  
- PKG_CONFIG_DEPENDS:= \
--	CONFIG_PACKAGE_$(PKG_NAME)_Iptables_Transparent_Proxy \
--	CONFIG_PACKAGE_$(PKG_NAME)_Nftables_Transparent_Proxy \
- 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Brook \
- 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy \
- 	CONFIG_PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria \
-@@ -31,8 +29,9 @@ LUCI_TITLE:=LuCI support for PassWall 2
+ LUCI_TITLE:=LuCI support for PassWall 2
  LUCI_PKGARCH:=all
- LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
+-LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
++LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl +unzip \
  	+ip-full +libuci-lua +lua +luci-compat +luci-lib-jsonc +resolveip +tcping \
--	+xray-core +v2ray-geoip +v2ray-geosite \
+ 	+xray-core +v2ray-geoip +v2ray-geosite \
 -	+unzip \
-+	+xray-core +v2ray-geoip +v2ray-geosite +unzip \
-+	+dnsmasq-full +dnsmasq_full_nftset +nftables \
 +	+kmod-nft-socket +kmod-nft-tproxy +kmod-nft-nat \
  	+PACKAGE_$(PKG_NAME)_INCLUDE_Brook:brook \
  	+PACKAGE_$(PKG_NAME)_INCLUDE_Haproxy:haproxy \
  	+PACKAGE_$(PKG_NAME)_INCLUDE_Hysteria:hysteria \
-@@ -54,33 +53,6 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
+@@ -54,33 +54,6 @@ LUCI_DEPENDS:=+coreutils +coreutils-base64 +coreutils-nohup +curl \
  define Package/$(PKG_NAME)/config
  menu "Configuration"
  
