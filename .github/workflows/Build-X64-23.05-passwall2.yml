@@ -109,7 +109,6 @@ jobs:
         echo "Using No.${tgtpic} pic as default argon background."
         rm ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
         cp ${MAIN_PATH}/custom/${tgtpic}.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
-        sed -i '154s/Login/Log in/' ./feeds/luci/themes/luci-theme-argon/luasrc/view/themes/argon/sysauth.htm
         ./scripts/feeds update -a
         ./scripts/feeds install -a
 
