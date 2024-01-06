@@ -70,8 +70,6 @@ jobs:
         cd ${OPENWRT_PATH}/feeds/luci
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
-        wget -O ${MAIN_PATH}/patches/upargon.patch https://github.com/immortalwrt/luci/commit/c87b01d4a0b91558676bc0b0097e2f2e315891d5.patch
-        git am ${MAIN_PATH}/patches/upargon.patch
         wget -O ${MAIN_PATH}/patches/upkernel.patch https://github.com/openwrt/openwrt/commit/9064c60077b14cbdfd83d7909b05a27e929cc53e.patch
         cd ${OPENWRT_PATH}
         git am ${MAIN_PATH}/patches/upkernel.patch
