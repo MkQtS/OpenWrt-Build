@@ -66,8 +66,15 @@ jobs:
     - name: Apply patches
       continue-on-error: true
       run: |
-        # Add compilation date
+        wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/404.patch
+        wget -qO ${MAIN_PATH}/patches/kernel.patch https://patch-diff.githubusercontent.com/raw/openwrt/openwrt/pull/14778.patch
+        # Update Kernel
+        cd ${OPENWRT_PATH}
+        git am ${MAIN_PATH}/patches/kernel.patch
         cd ${OPENWRT_PATH}/feeds/luci
+        # Update passwall
+        git am ${MAIN_PATH}/patches/passwall.patch
+        # Add compilation date
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
 
