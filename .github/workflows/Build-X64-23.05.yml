@@ -66,11 +66,13 @@ jobs:
     - name: Apply patches
       continue-on-error: true
       run: |
+        wget -qO ${MAIN_PATH}/patches/intel-microcode.patch https://github.com/openwrt/openwrt/commit/7241a91c948066e9062729a043944fd313826753.patch
+        wget -qO ${MAIN_PATH}/patches/dnsmasq.patch https://patch-diff.githubusercontent.com/raw/openwrt/openwrt/pull/14669.patch
         wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/404.patch
-        wget -qO ${MAIN_PATH}/patches/kernel.patch https://patch-diff.githubusercontent.com/raw/openwrt/openwrt/pull/14778.patch
-        # Update Kernel
+        # Update intel-microcode, dnsmasq
         cd ${OPENWRT_PATH}
-        git am ${MAIN_PATH}/patches/kernel.patch
+        git am ${MAIN_PATH}/patches/intel-microcode.patch
+        git am ${MAIN_PATH}/patches/dnsmasq.patch
         cd ${OPENWRT_PATH}/feeds/luci
         # Update passwall
         git am ${MAIN_PATH}/patches/passwall.patch
