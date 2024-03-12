@@ -67,9 +67,8 @@ jobs:
       continue-on-error: true
       run: |
         wget -qO ${MAIN_PATH}/patches/intel-microcode.patch https://github.com/openwrt/openwrt/commit/7241a91c948066e9062729a043944fd313826753.patch
-        wget -qO ${MAIN_PATH}/patches/dnsmasq.patch https://github.com/openwrt/openwrt/commit/33160df17f92df2f4b4b75895d3b52b8b305833f.patch
-        sed -i '30 s/7/4/' ${MAIN_PATH}/patches/dnsmasq.patch
-        wget -qO ${MAIN_PATH}/patches/passwall.diff https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/404.diff
+        wget -qO ${MAIN_PATH}/patches/dnsmasq.patch https://github.com/openwrt/openwrt/commit/c47d60f5bd67949abac254884a4aac5beab9cca1.patch
+        wget -qO ${MAIN_PATH}/patches/passwall.diff https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/405.diff
         # Update intel-microcode, dnsmasq
         cd ${OPENWRT_PATH}
         git am ${MAIN_PATH}/patches/intel-microcode.patch
