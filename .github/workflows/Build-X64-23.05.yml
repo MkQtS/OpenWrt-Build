@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 0 10 * * 3
+    - cron: 0 10 * * 4
   workflow_dispatch:
 
 jobs:
@@ -66,13 +66,16 @@ jobs:
     - name: Apply patches
       continue-on-error: true
       run: |
-        wget -qO ${MAIN_PATH}/patches/intel-microcode.patch https://github.com/openwrt/openwrt/commit/7241a91c948066e9062729a043944fd313826753.patch
-        wget -qO ${MAIN_PATH}/patches/dnsmasq.patch https://github.com/openwrt/openwrt/commit/c47d60f5bd67949abac254884a4aac5beab9cca1.patch
-        # Update intel-microcode, dnsmasq
+        wget -qO ${MAIN_PATH}/patches/dnsmasq1.patch https://github.com/openwrt/openwrt/commit/a6f978e361a2d196888248aa046fd030469b753a.patch
+        wget -qO ${MAIN_PATH}/patches/dnsmasq2.patch https://github.com/openwrt/openwrt/commit/d2168215dedaf523e0d4112f479b6678c66f741d.patch
+        wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/407.patch
+        # Update dnsmasq
         cd ${OPENWRT_PATH}
-        git am ${MAIN_PATH}/patches/intel-microcode.patch
-        git am ${MAIN_PATH}/patches/dnsmasq.patch
+        git am ${MAIN_PATH}/patches/dnsmasq1.patch
+        git am ${MAIN_PATH}/patches/dnsmasq2.patch
         cd ${OPENWRT_PATH}/feeds/luci
+        # Update passwall 
+        git am ${MAIN_PATH}/patches/passwall.patch
         # Add compilation date
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
@@ -85,7 +88,7 @@ jobs:
         # VERSION_CODE_FILENAMES
         sed -i '269s/default y/default n/' ./package/base-files/image-config.in
         # default lan ip
-        sed -i 's/192\.168\.1\.1/192\.168\.6\.1/g' ./package/base-files/files/bin/config_generate
+        sed -i 's/192\.168\.1\.1/192.168.6.1/g' ./package/base-files/files/bin/config_generate
         # busybox options: unlink, tree
         sed -i '901s/default n/default y/' ./package/utils/busybox/Config-defaults.in
         sed -i '2203s/default n/default y/' ./package/utils/busybox/Config-defaults.in
