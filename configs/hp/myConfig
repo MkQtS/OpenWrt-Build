@@ -13,6 +13,7 @@ CONFIG_LUCI_LANG_zh_Hans=y
 CONFIG_PACKAGE_autocore=y
 CONFIG_PACKAGE_coremark=y
 CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_diffutils=y
 CONFIG_PACKAGE_htop=y
 CONFIG_PACKAGE_iftop=y
 CONFIG_PACKAGE_intel-microcode=y

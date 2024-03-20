@@ -2,7 +2,7 @@ name: Build X86-64 23.05
 
 on:
   schedule:
-    - cron: 0 10 * * 4
+    - cron: 0 10 * * 2
   workflow_dispatch:
 
 jobs:
@@ -66,15 +66,30 @@ jobs:
     - name: Apply patches
       continue-on-error: true
       run: |
-        wget -qO ${MAIN_PATH}/patches/dnsmasq1.patch https://github.com/openwrt/openwrt/commit/a6f978e361a2d196888248aa046fd030469b753a.patch
-        wget -qO ${MAIN_PATH}/patches/dnsmasq2.patch https://github.com/openwrt/openwrt/commit/d2168215dedaf523e0d4112f479b6678c66f741d.patch
-        wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/407.patch
+        wget -qO ${MAIN_PATH}/patches/dnsmasq1.patch https://github.com/openwrt/openwrt/commit/af22a169c1e480b991eb8c4e69674bf5846d6215.patch
+        wget -qO ${MAIN_PATH}/patches/dnsmasq2.patch https://github.com/openwrt/openwrt/commit/875822f283163c038c93fd5405c6dd9796228eb7.patch
+        wget -qO ${MAIN_PATH}/patches/dnsmasq3.patch https://github.com/openwrt/openwrt/commit/853b638f8584a658214220fea770b2715621f826.patch
+        wget -qO ${MAIN_PATH}/patches/dnsmasq4.patch https://github.com/openwrt/openwrt/commit/03a3a729ec96b5c31cad5f03cd2c3d1a0b4c471f.patch
+        wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/408.patch
+        wget -qO ${MAIN_PATH}/patches/argon1.patch https://github.com/MkQtS/luci/commit/e18b2c34afd5d80199063df71e3986bb17a4c08d.patch
+        wget -qO ${MAIN_PATH}/patches/argon2.patch https://github.com/MkQtS/luci/commit/e0d4dd7e43e0ec016a591c90a134c76e8e0e37d8.patch
+        wget -qO ${MAIN_PATH}/patches/argon3.patch https://github.com/MkQtS/luci/commit/48348c504c6a03ec758e1f28f7ff27fe18659163.patch
+        wget -qO ${MAIN_PATH}/patches/argon4.patch https://github.com/MkQtS/luci/commit/6c177c7a3af67f77422259dc4448eed4f3635191.patch
+        wget -qO ${MAIN_PATH}/patches/argon5.patch https://github.com/MkQtS/luci/commit/4830d40d038bff6f3c93c729c5f5b62f68d86d3a.patch
         # Update dnsmasq
         cd ${OPENWRT_PATH}
         git am ${MAIN_PATH}/patches/dnsmasq1.patch
         git am ${MAIN_PATH}/patches/dnsmasq2.patch
+        git am ${MAIN_PATH}/patches/dnsmasq3.patch
+        git am ${MAIN_PATH}/patches/dnsmasq4.patch
         cd ${OPENWRT_PATH}/feeds/luci
-        # Update passwall 
+        # Update argon
+        git am ${MAIN_PATH}/patches/argon1.patch
+        git am ${MAIN_PATH}/patches/argon2.patch
+        git am ${MAIN_PATH}/patches/argon3.patch
+        git am ${MAIN_PATH}/patches/argon4.patch
+        git am ${MAIN_PATH}/patches/argon5.patch
+        # Update passwall
         git am ${MAIN_PATH}/patches/passwall.patch
         # Add compilation date
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
