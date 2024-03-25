@@ -1,0 +1,76 @@
+From c5d08c9288890fdfba855d4772240079a7cdc871 Mon Sep 17 00:00:00 2001
+From: somebody <no@thankyou.com>
+Date: Tue, 25 Mar 2024 22:30:00 +0800
+Subject: [PATCH] my modifications
+
+Change default cflags and lan ip;
+enable unlink and tree;
+disable VERSION_CODE_FILENAMES;
+---
+ include/target.mk                            | 2 +-
+ package/base-files/files/bin/config_generate | 2 +-
+ package/base-files/image-config.in           | 2 +-
+ package/utils/busybox/Config-defaults.in     | 4 ++--
+ 4 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/include/target.mk b/include/target.mk
+index ac414ef..cc1c0a0 100644
+--- a/include/target.mk
++++ b/include/target.mk
+@@ -222,7 +222,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
+ ifeq ($(DUMP),1)
+   BuildTarget=$(BuildTargets/DumpCurrent)
+ 
+-  CPU_CFLAGS = -Os -pipe
++  CPU_CFLAGS = -O2 -pipe
+   ifneq ($(findstring mips,$(ARCH)),)
+     ifneq ($(findstring mips64,$(ARCH)),)
+       CPU_TYPE ?= mips64
+diff --git a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
+index 6589897..c1cd947 100755
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -162,7 +162,7 @@ generate_network() {
+ 		static)
+ 			local ipad
+ 			case "$1" in
+-				lan) ipad=${ipaddr:-"192.168.1.1"} ;;
++				lan) ipad=${ipaddr:-"192.168.6.1"} ;;
+ 				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
+ 			esac
+ 
+diff --git a/package/base-files/image-config.in b/package/base-files/image-config.in
+index 7677df9..ac1b09b 100644
+--- a/package/base-files/image-config.in
++++ b/package/base-files/image-config.in
+@@ -266,7 +266,7 @@ if VERSIONOPT
+ 	config VERSION_CODE_FILENAMES
+ 		bool
+ 		prompt "Revision code in filenames"
+-		default y
++		default n
+ 		help
+ 			Enable this to include the revision identifier or the configured
+ 			version code into the firmware image, SDK- and Image Builder archive
+diff --git a/package/utils/busybox/Config-defaults.in b/package/utils/busybox/Config-defaults.in
+index e5aac86..bebe71a 100644
+--- a/package/utils/busybox/Config-defaults.in
++++ b/package/utils/busybox/Config-defaults.in
+@@ -898,7 +898,7 @@ config BUSYBOX_DEFAULT_UNIQ
+ 	default y
+ config BUSYBOX_DEFAULT_UNLINK
+ 	bool
+-	default n
++	default y
+ config BUSYBOX_DEFAULT_USLEEP
+ 	bool
+ 	default n
+@@ -2200,7 +2200,7 @@ config BUSYBOX_DEFAULT_TIME
+ 	default y
+ config BUSYBOX_DEFAULT_TREE
+ 	bool
+-	default n
++	default y
+ config BUSYBOX_DEFAULT_TS
+ 	bool
+ 	default n

@@ -66,18 +66,10 @@ jobs:
     - name: Apply patches
       continue-on-error: true
       run: |
-        wget -qO ${MAIN_PATH}/patches/dnsmasq1.patch https://github.com/openwrt/openwrt/commit/af22a169c1e480b991eb8c4e69674bf5846d6215.patch
-        wget -qO ${MAIN_PATH}/patches/dnsmasq2.patch https://github.com/openwrt/openwrt/commit/875822f283163c038c93fd5405c6dd9796228eb7.patch
-        wget -qO ${MAIN_PATH}/patches/dnsmasq3.patch https://github.com/openwrt/openwrt/commit/853b638f8584a658214220fea770b2715621f826.patch
-        wget -qO ${MAIN_PATH}/patches/dnsmasq4.patch https://github.com/openwrt/openwrt/commit/03a3a729ec96b5c31cad5f03cd2c3d1a0b4c471f.patch
         wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/408.patch
         wget -qO ${MAIN_PATH}/patches/argon.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/409.patch
-        # Update dnsmasq
         cd ${OPENWRT_PATH}
-        git am ${MAIN_PATH}/patches/dnsmasq1.patch
-        git am ${MAIN_PATH}/patches/dnsmasq2.patch
-        git am ${MAIN_PATH}/patches/dnsmasq3.patch
-        git am ${MAIN_PATH}/patches/dnsmasq4.patch
+        git am ${MAIN_PATH}/patches/myModifications.patch
         cd ${OPENWRT_PATH}/feeds/luci
         # Update argon, passwall
         git am ${MAIN_PATH}/patches/argon.patch
@@ -86,18 +78,8 @@ jobs:
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
 
-    - name: Customize
+    - name: Custom argon wallpaper
       run: |
-        cd ${OPENWRT_PATH}
-        # Change default cflags
-        sed -i 's/Os/O2/g' ./include/target.mk
-        # VERSION_CODE_FILENAMES
-        sed -i '269s/default y/default n/' ./package/base-files/image-config.in
-        # default lan ip
-        sed -i 's/192\.168\.1\.1/192.168.6.1/g' ./package/base-files/files/bin/config_generate
-        # busybox options: unlink, tree
-        sed -i '901s/default n/default y/' ./package/utils/busybox/Config-defaults.in
-        sed -i '2203s/default n/default y/' ./package/utils/busybox/Config-defaults.in
         picct=0
         for pic in ${MAIN_PATH}/custom/*.jpg; do
           picct=$(expr ${picct} + 1)
