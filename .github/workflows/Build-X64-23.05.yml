@@ -94,12 +94,14 @@ jobs:
       continue-on-error: true
       run: |
         wget -qO ${MAIN_PATH}/patches/argon.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/409.patch
+        wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/414.patch
         cd ${OPENWRT_PATH}
         git am ${MAIN_PATH}/patches/myModifications.patch
         cd ${OPENWRT_PATH}/feeds/packages
         git am ${MAIN_PATH}/Update-chinadns-ng.patch
         cd ${OPENWRT_PATH}/feeds/luci
         git am ${MAIN_PATH}/patches/argon.patch
+        git am ${MAIN_PATH}/patches/passwall.patch
         git am ${MAIN_PATH}/patches/Update-passwall-makefile.patch
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
         git am ${MAIN_PATH}/patches/Add-compilation-date.patch
@@ -161,6 +163,7 @@ jobs:
         mv ${OPENWRT_PATH}/bin/targets/x86/64/* ${RELEASES_PATH}
         cd ${OPENWRT_PATH}
         make clean
+        ./scripts/dl_cleanup.py
         mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
         rm -rf ${OPENWRT_PATH}
         cd ${RELEASES_PATH}
