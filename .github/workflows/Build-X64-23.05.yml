@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Free Disk Space
@@ -150,8 +152,6 @@ jobs:
 
     - name: Delete old release
       continue-on-error: true
-      permissions:
-        contents: write
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
