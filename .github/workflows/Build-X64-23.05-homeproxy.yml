@@ -83,7 +83,7 @@ jobs:
         done
         tgtpic=$(expr $(date +%s) % ${picct} + 1)
         echo "Using No.${tgtpic} pic as default argon background."
-        mv -f ${MAIN_PATH}/custom/${tgtpic}.jpg ./feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
+        mv -f ${MAIN_PATH}/custom/${tgtpic}.jpg ${OPENWRT_PATH}/feeds/luci/themes/luci-theme-argon/htdocs/luci-static/argon/img/bg1.jpg
 
     - name: Generate and update configs
       run: |
