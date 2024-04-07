@@ -6,6 +6,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
     - name: Free Disk Space
@@ -32,13 +34,6 @@ jobs:
       with:
         ref: main
 
-    - name: Get source code
-      uses: actions/checkout@v4
-      with:
-        repository: immortalwrt/immortalwrt
-        ref: openwrt-23.05
-        path: 'openwrt'
-
     - name: Set environment
       run: |
         mkdir -p releases artifacts
@@ -48,11 +43,17 @@ jobs:
         git config --global user.name "github-actions"
         git config --global user.email "github-actions@github.com"
 
-    - name: Get feeds and dl
+    - name: Get immortalwrt code
+      uses: actions/checkout@v4
+      with:
+        repository: immortalwrt/immortalwrt
+        ref: openwrt-23.05
+        path: ./openwrt
+
+    - name: Get last dl
       run: |
         cd ${OPENWRT_PATH}
-        ./scripts/feeds update -a
-        ./scripts/feeds install -a
+        mkdir -p ./feeds
         wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64-23.05/dl_cache.tar.zst || dlCacheState="notExist"
         if [ ${dlCacheState}x = "notExist"x ]; then
           echo "dl cache does not exist."
@@ -60,6 +61,34 @@ jobs:
           tar --zstd -xf dl_cache.tar.zst && rm -f dl_cache.tar.zst
           echo "dl cache restored."
         fi
+
+    - name: Get packages code
+      uses: actions/checkout@v4
+      with:
+        repository: immortalwrt/packages
+        ref: openwrt-23.05
+        path: ./openwrt/feeds/packages
+
+    - name: Get luci code
+      uses: actions/checkout@v4
+      with:
+        repository: immortalwrt/luci
+        ref: openwrt-23.05
+        path: ./openwrt/feeds/luci
+
+    - name: Get routing code
+      uses: actions/checkout@v4
+      with:
+        repository: openwrt/routing
+        ref: openwrt-23.05
+        path: ./openwrt/feeds/routing
+
+    - name: Get telephony code
+      uses: actions/checkout@v4
+      with:
+        repository: openwrt/telephony
+        ref: openwrt-23.05
+        path: ./openwrt/feeds/telephony
 
     - name: Apply patches
       continue-on-error: true
@@ -88,6 +117,8 @@ jobs:
     - name: Generate and update configs
       run: |
         cd ${OPENWRT_PATH}
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
         cat ${MAIN_PATH}/configs/hp/myConfig > ./.config
         make defconfig
         cp ./.config ${MAIN_PATH}/configs/hp/new_all_config
@@ -110,26 +141,22 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         echo "Using $(($(nproc)+1)) threads to compile..."
-        make download world -j $(($(nproc)+1)) || make download world -j1 V=s
+        make download -j $(($(nproc)+1))
+        make world -j $(($(nproc)+1)) || make world -j1 V=s
         echo "RELEASE_BODY=Firmware built at: $(date -d "8 hour" -u +"%Y-%m-%d %H:%M")" >> $GITHUB_ENV
         du -h --max-depth=1
 
     - name: Delete old release
       continue-on-error: true
-      uses: dev-drprasad/delete-tag-and-release@v0.2.1
-      with:
-        delete_release: true
-        tag_name: latest-x64-23.05-hp
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release delete -y 'latest-x64-23.05-hp' --cleanup-tag
 
     - name: Manage releases and artifacts
       run: |
         rm -rf ${OPENWRT_PATH}/bin/targets/x86/64/packages
         mv ${OPENWRT_PATH}/bin/targets/x86/64/* ${RELEASES_PATH}
-        cd ${OPENWRT_PATH}
-        make clean
-        rm -rf ${OPENWRT_PATH}
         cd ${RELEASES_PATH}
         echo "sha256sums is:"
         cat ${RELEASES_PATH}/sha256sums
