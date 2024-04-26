@@ -96,17 +96,13 @@ jobs:
       continue-on-error: true
       run: |
         wget -qO ${MAIN_PATH}/patches/argon.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/409.patch
-        wget -qO ${MAIN_PATH}/patches/passwall.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/414.patch
         cd ${OPENWRT_PATH}
         git am ${MAIN_PATH}/patches/myModifications.patch
         cd ${OPENWRT_PATH}/feeds/packages
         git am ${MAIN_PATH}/patches/Update-chinadns-ng.patch
         cd ${OPENWRT_PATH}/feeds/luci
         git am ${MAIN_PATH}/patches/argon.patch
-        git am ${MAIN_PATH}/patches/passwall.patch
         git am ${MAIN_PATH}/patches/Update-passwall-makefile.patch
-        sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ${MAIN_PATH}/patches/Add-compilation-date.patch
-        git am ${MAIN_PATH}/patches/Add-compilation-date.patch
 
     - name: Custom argon wallpaper
       run: |
@@ -125,6 +121,7 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         cat ${MAIN_PATH}/configs/X64-23.05/myConfig > ./.config
+        sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ./.config
         make defconfig
         cp ./.config ${MAIN_PATH}/configs/X64-23.05/new_all_config
         sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/X64-23.05/new_diff_config
