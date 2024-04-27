@@ -42,8 +42,8 @@ jobs:
         echo "MAIN_PATH=$(pwd)" >> $GITHUB_ENV
         echo "OPENWRT_PATH=$(pwd)/openwrt" >> $GITHUB_ENV
         echo "RELEASES_PATH=$(pwd)/releases" >> $GITHUB_ENV
-        git config --global user.name "github-actions"
-        git config --global user.email "github-actions@github.com"
+        git config --global user.name "Github Actions"
+        git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
     - name: Get immortalwrt code
       uses: actions/checkout@v4
@@ -121,10 +121,10 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         cat ${MAIN_PATH}/configs/X64-23.05/myConfig > ./.config
-        sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ./.config
         make defconfig
         cp ./.config ${MAIN_PATH}/configs/X64-23.05/new_all_config
         sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/X64-23.05/new_diff_config
+        sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ./.config
         cd ${MAIN_PATH}/configs/X64-23.05/
         if [ -n "$(diff -q new_all_config all_config)" ]; then
           rm -f all_config diff_config
