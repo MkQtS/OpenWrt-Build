@@ -96,10 +96,6 @@ jobs:
       continue-on-error: true
       run: |
         wget -qO ${MAIN_PATH}/patches/argon.patch https://patch-diff.githubusercontent.com/raw/immortalwrt/luci/pull/409.patch
-        cd ${OPENWRT_PATH}
-        git am ${MAIN_PATH}/patches/myModifications.patch
-        cd ${OPENWRT_PATH}/feeds/packages
-        git am ${MAIN_PATH}/patches/Update-chinadns-ng.patch
         cd ${OPENWRT_PATH}/feeds/luci
         git am ${MAIN_PATH}/patches/argon.patch
         git am ${MAIN_PATH}/patches/Update-passwall-makefile.patch
@@ -159,12 +155,8 @@ jobs:
         rm -rf ${OPENWRT_PATH}/bin/targets/x86/64/packages
         mv ${OPENWRT_PATH}/bin/targets/x86/64/* ${RELEASES_PATH}
         cd ${OPENWRT_PATH}
-        ./scripts/dl_cleanup.py
         make clean
-        mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
-        cd ${RELEASES_PATH}
-        rm -rf ${OPENWRT_PATH}
-        tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
+        cd ${RELEASES_PATH} && rm -rf ${OPENWRT_PATH}
         echo "sha256sums is:"
         cat ${RELEASES_PATH}/sha256sums
 

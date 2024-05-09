@@ -1,4 +1,4 @@
-name: Build X86-64 master with homeproxy
+name: Build X86-64 master
 
 on:
   workflow_dispatch:
@@ -54,7 +54,7 @@ jobs:
       run: |
         cd ${OPENWRT_PATH}
         mkdir -p ./feeds
-        wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64-23.05/dl_cache.tar.zst || dlCacheState="notExist"
+        wget -q https://github.com/${GITHUB_REPOSITORY}/releases/download/latest-x64-master/dl_cache.tar.zst || dlCacheState="notExist"
         if [ ${dlCacheState}x = "notExist"x ]; then
           echo "dl cache does not exist."
         else
@@ -98,6 +98,7 @@ jobs:
         git am ${MAIN_PATH}/patches/myModifications.patch
         cd ${OPENWRT_PATH}/feeds/luci
         git am ${MAIN_PATH}/patches/argon.patch
+        git am ${MAIN_PATH}/patches/Update-passwall-makefile.patch
 
     - name: Custom argon wallpaper
       run: |
@@ -115,19 +116,19 @@ jobs:
         cd ${OPENWRT_PATH}
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-        cat ${MAIN_PATH}/configs/hp/myConfig > ./.config
+        cat ${MAIN_PATH}/configs/X64-master/myConfig > ./.config
         make defconfig
-        cp ./.config ${MAIN_PATH}/configs/hp/new_all_config
-        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/hp/new_diff_config
+        cp ./.config ${MAIN_PATH}/configs/X64-master/new_all_config
+        sh ./scripts/diffconfig.sh > ${MAIN_PATH}/configs/X64-master/new_diff_config
         sed -i "s/BUILD_DATE/$(date -d "8 hour" -u +%Y-%m-%d)/" ./.config
-        cd ${MAIN_PATH}/configs/hp/
+        cd ${MAIN_PATH}/configs/X64-master/
         if [ -n "$(diff -q new_all_config all_config)" ]; then
           rm -f all_config diff_config
           mv new_all_config all_config
           mv new_diff_config diff_config
           cd ${MAIN_PATH}
-          git add ${MAIN_PATH}/configs/hp/all_config ${MAIN_PATH}/configs/hp/diff_config
-          git commit -m "Update X64-master-homeproxy config files"
+          git add ${MAIN_PATH}/configs/X64-master/all_config ${MAIN_PATH}/configs/X64-master/diff_config
+          git commit -m "Update X64-master config files"
           git push origin main
           echo "New configs commited."
         else
@@ -147,20 +148,25 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release delete -y 'latest-x64-master-hp' --cleanup-tag
+        gh release delete -y 'latest-x64-master' --cleanup-tag
 
     - name: Manage releases and artifacts
       run: |
         rm -rf ${OPENWRT_PATH}/bin/targets/x86/64/packages
         mv ${OPENWRT_PATH}/bin/targets/x86/64/* ${RELEASES_PATH}
-        cd ${RELEASES_PATH}
+        cd ${OPENWRT_PATH}
+        make clean
+        ./scripts/dl_cleanup.py
+        mv ${OPENWRT_PATH}/dl ${RELEASES_PATH}
+        cd ${RELEASES_PATH} && rm -rf ${OPENWRT_PATH}
+        tar --zstd -cf dl_cache.tar.zst ./dl --remove-files
         echo "sha256sums is:"
         cat ${RELEASES_PATH}/sha256sums
 
     - name: Upload to Releases
       uses: ncipollo/release-action@v1
       with:
-        name: latest master x64 with homeproxy firmware
-        tag: latest-x64-master-hp
+        name: latest master x64 firmware
+        tag: latest-x64-master
         artifacts: ${{ env.RELEASES_PATH }}/*
         body: ${{ env.RELEASE_BODY }}
