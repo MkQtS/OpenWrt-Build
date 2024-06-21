@@ -1,21 +1,24 @@
 From c5d08c9288890fdfba855d4772240079a7cdc871 Mon Sep 17 00:00:00 2001
 From: somebody <no@thankyou.com>
 Date: Tue, 25 Mar 2024 22:30:00 +0800
-Subject: [PATCH] my modifications
+Subject: [PATCH] base settings: my modifications
 
 Change default cflags and lan ip;
+Modify default-settings;
 Enable unlink and tree.
 ---
- include/target.mk                            | 2 +-
- package/base-files/files/bin/config_generate | 2 +-
- package/utils/busybox/Config-defaults.in     | 4 ++--
- 3 files changed, 4 insertions(+), 4 deletions(-)
+ include/target.mk                                             | 2 +-
+ package/base-files/files/bin/config_generate                  | 2 +-
+ package/emortal/default-settings/files/99-default-settings    | 3 ---
+ .../default-settings/files/99-default-settings-chinese        | 3 +--
+ package/utils/busybox/Config-defaults.in                      | 4 ++--
+ 5 files changed, 5 insertions(+), 9 deletions(-)
 
 diff --git a/include/target.mk b/include/target.mk
 index ac414ef..cc1c0a0 100644
 --- a/include/target.mk
 +++ b/include/target.mk
-@@ -223,7 +223,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
+@@ -228,7 +228,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
  ifeq ($(DUMP),1)
    BuildTarget=$(BuildTargets/DumpCurrent)
  
@@ -37,6 +40,35 @@ index 6589897..c1cd947 100755
  				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
  			esac
  
+diff --git a/package/emortal/default-settings/files/99-default-settings b/package/emortal/default-settings/files/99-default-settings
+index db753461cc..5d9831e696 100755
+--- a/package/emortal/default-settings/files/99-default-settings
++++ b/package/emortal/default-settings/files/99-default-settings
+@@ -12,9 +12,6 @@ if ! uci -q get system.@imm_init[0].lang > "/dev/null"; then
+ 	EOF
+ fi
+ 
+-sed -i "/log-facility/d" "/etc/dnsmasq.conf"
+-echo "log-facility=/dev/null" >> "/etc/dnsmasq.conf"
+-
+ ln -sf "/sbin/ip" "/usr/bin/ip"
+ 
+ exit 0
+diff --git a/package/emortal/default-settings/files/99-default-settings-chinese b/package/emortal/default-settings/files/99-default-settings-chinese
+index d640c6bf02..bd2163d6f5 100755
+--- a/package/emortal/default-settings/files/99-default-settings-chinese
++++ b/package/emortal/default-settings/files/99-default-settings-chinese
+@@ -9,9 +9,8 @@ if ! uci -q get system.@imm_init[0].system_chn > "/dev/null"; then
+ 
+ 		delete system.ntp.server
+ 		add_list system.ntp.server="ntp.tencent.com"
+-		add_list system.ntp.server="ntp1.aliyun.com"
++		add_list system.ntp.server="ntp.aliyun.com"
+ 		add_list system.ntp.server="ntp.ntsc.ac.cn"
+-		add_list system.ntp.server="cn.ntp.org.cn"
+ 
+ 		set system.@imm_init[0].system_chn="1"
+ 		commit system
 diff --git a/package/utils/busybox/Config-defaults.in b/package/utils/busybox/Config-defaults.in
 index e5aac86..bebe71a 100644
 --- a/package/utils/busybox/Config-defaults.in

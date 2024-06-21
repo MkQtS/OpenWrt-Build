@@ -98,7 +98,8 @@ jobs:
         git am ${MAIN_PATH}/patches/myModifications.patch
         cd ${OPENWRT_PATH}/feeds/luci
         git am ${MAIN_PATH}/patches/argon.patch
-        git am ${MAIN_PATH}/patches/Update-passwall-makefile.patch
+        cd ${OPENWRT_PATH}/feeds/packages
+        git am ${MAIN_PATH}/patches/Update-chinadns-ng.patch
 
     - name: Custom argon wallpaper
       run: |
