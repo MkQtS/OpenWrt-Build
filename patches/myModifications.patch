@@ -8,32 +8,19 @@ Modify default-settings;
 Enable unlink and tree.
 
 ---
- include/target.mk                                         | 8 ++------
- package/base-files/files/bin/config_generate              | 2 +-
- package/emortal/default-settings/Makefile                 | 2 +-
- .../emortal/default-settings/files/99-default-settings    | 3 ---
- .../default-settings/files/99-default-settings-chinese    | 3 +--
- package/utils/busybox/Config-defaults.in                  | 4 ++--
- 6 files changed, 7 insertions(+), 15 deletions(-)
+ include/target.mk                                             | 2 +-
+ package/base-files/files/bin/config_generate                  | 2 +-
+ package/emortal/default-settings/Makefile                     | 2 +-
+ package/emortal/default-settings/files/99-default-settings    | 3 ---
+ .../default-settings/files/99-default-settings-chinese        | 3 +--
+ package/utils/busybox/Config-defaults.in                      | 4 ++--
+ 6 files changed, 6 insertions(+), 10 deletions(-)
 
 diff --git a/include/target.mk b/include/target.mk
-index 2797b55958..b55f258a01 100644
+index 728aba5e9b..9497260f77 100644
 --- a/include/target.mk
 +++ b/include/target.mk
-@@ -66,11 +66,7 @@ DEFAULT_PACKAGES.tweak:=\
- 	kmod-nf-nathelper \
- 	kmod-nf-nathelper-extra \
- 	luci-light \
--	luci-app-cpufreq \
--	luci-app-opkg \
--	luci-compat \
--	luci-lib-base \
--	luci-lib-ipkg
-+	luci-app-cpufreq
- 
- ifneq ($(DUMP),)
-   all: dumpinfo
-@@ -232,7 +228,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
+@@ -232,7 +232,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
  ifeq ($(DUMP),1)
    BuildTarget=$(BuildTargets/DumpCurrent)
  
