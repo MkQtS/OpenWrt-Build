@@ -1,24 +1,39 @@
-From c5d08c9288890fdfba855d4772240079a7cdc871 Mon Sep 17 00:00:00 2001
-From: somebody <no@thankyou.com>
-Date: Tue, 25 Mar 2024 22:30:00 +0800
+From fab3120ef7d33503b960e8b51aaf8141ff5f4751 Mon Sep 17 00:00:00 2001
+From: someone <no@thankyou.com>
+Date: Thu, 21 Nov 2024 16:00:00 +0800
 Subject: [PATCH] base settings: my modifications
 
-Change default cflags and lan ip;
+Change default apps, cflags and lan ip;
 Modify default-settings;
 Enable unlink and tree.
+
 ---
- include/target.mk                                             | 2 +-
- package/base-files/files/bin/config_generate                  | 2 +-
- package/emortal/default-settings/files/99-default-settings    | 3 ---
- .../default-settings/files/99-default-settings-chinese        | 3 +--
- package/utils/busybox/Config-defaults.in                      | 4 ++--
- 5 files changed, 5 insertions(+), 9 deletions(-)
+ include/target.mk                                         | 8 ++------
+ package/base-files/files/bin/config_generate              | 2 +-
+ package/emortal/default-settings/Makefile                 | 2 +-
+ .../emortal/default-settings/files/99-default-settings    | 3 ---
+ .../default-settings/files/99-default-settings-chinese    | 3 +--
+ package/utils/busybox/Config-defaults.in                  | 4 ++--
+ 6 files changed, 7 insertions(+), 15 deletions(-)
 
 diff --git a/include/target.mk b/include/target.mk
-index ac414ef..cc1c0a0 100644
+index 2797b55958..b55f258a01 100644
 --- a/include/target.mk
 +++ b/include/target.mk
-@@ -228,7 +228,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
+@@ -66,11 +66,7 @@ DEFAULT_PACKAGES.tweak:=\
+ 	kmod-nf-nathelper \
+ 	kmod-nf-nathelper-extra \
+ 	luci-light \
+-	luci-app-cpufreq \
+-	luci-app-opkg \
+-	luci-compat \
+-	luci-lib-base \
+-	luci-lib-ipkg
++	luci-app-cpufreq
+ 
+ ifneq ($(DUMP),)
+   all: dumpinfo
+@@ -232,7 +228,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
  ifeq ($(DUMP),1)
    BuildTarget=$(BuildTargets/DumpCurrent)
  
@@ -28,7 +43,7 @@ index ac414ef..cc1c0a0 100644
      ifneq ($(findstring mips64,$(ARCH)),)
        CPU_TYPE ?= mips64
 diff --git a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
-index 6589897..c1cd947 100755
+index f634f5b0aa..2a0462ea56 100755
 --- a/package/base-files/files/bin/config_generate
 +++ b/package/base-files/files/bin/config_generate
 @@ -162,7 +162,7 @@ generate_network() {
@@ -39,6 +54,19 @@ index 6589897..c1cd947 100755
 +				lan) ipad=${ipaddr:-"192.168.6.1"} ;;
  				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
  			esac
+ 
+diff --git a/package/emortal/default-settings/Makefile b/package/emortal/default-settings/Makefile
+index 65a6f52a06..0835c3b340 100644
+--- a/package/emortal/default-settings/Makefile
++++ b/package/emortal/default-settings/Makefile
+@@ -16,7 +16,7 @@ define Package/default-settings
+   SECTION:=luci
+   CATEGORY:=LuCI
+   TITLE:=LuCI support for Default Settings
+-  DEPENDS:=+luci
++  DEPENDS:=+luci-light
+   PKGARCH:=all
+ endef
  
 diff --git a/package/emortal/default-settings/files/99-default-settings b/package/emortal/default-settings/files/99-default-settings
 index db753461cc..5d9831e696 100755
@@ -70,7 +98,7 @@ index d640c6bf02..bd2163d6f5 100755
  		set system.@imm_init[0].system_chn="1"
  		commit system
 diff --git a/package/utils/busybox/Config-defaults.in b/package/utils/busybox/Config-defaults.in
-index e5aac86..bebe71a 100644
+index 0552ee7e77..78c3e845b3 100644
 --- a/package/utils/busybox/Config-defaults.in
 +++ b/package/utils/busybox/Config-defaults.in
 @@ -898,7 +898,7 @@ config BUSYBOX_DEFAULT_UNIQ
