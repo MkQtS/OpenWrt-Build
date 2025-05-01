@@ -1,18 +1,19 @@
 From fab3120ef7d33503b960e8b51aaf8141ff5f4751 Mon Sep 17 00:00:00 2001
 From: someone <no@thankyou.com>
 Date: Thu, 21 Nov 2024 16:00:00 +0800
-Subject: [PATCH] base settings: my modifications
+Subject: [PATCH] base: my modifications
 
-Change default apps, cflags and lan ip;
+Change default apps, cflags;
 Modify default-settings;
-Enable unlink and tree.
+Increase default nf_conntrack_tcp_timeout_established;
+Enable busybox unlink and tree.
 
 ---
  include/target.mk                                             | 2 +-
- package/base-files/files/bin/config_generate                  | 2 +-
  package/emortal/default-settings/Makefile                     | 2 +-
  package/emortal/default-settings/files/99-default-settings    | 3 ---
  .../default-settings/files/99-default-settings-chinese        | 3 +--
+ package/kernel/linux/files/sysctl-nf-conntrack.conf           | 2 +-
  package/utils/busybox/Config-defaults.in                      | 4 ++--
  6 files changed, 6 insertions(+), 10 deletions(-)
 
@@ -20,7 +21,7 @@ diff --git a/include/target.mk b/include/target.mk
 index 728aba5e9b..9497260f77 100644
 --- a/include/target.mk
 +++ b/include/target.mk
-@@ -232,7 +232,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
+@@ -238,7 +238,7 @@ LINUX_RECONF_DIFF = $(SCRIPT_DIR)/kconfig.pl - '>' $(call __linux_confcmd,$(filt
  ifeq ($(DUMP),1)
    BuildTarget=$(BuildTargets/DumpCurrent)
  
@@ -29,19 +30,6 @@ index 728aba5e9b..9497260f77 100644
    ifneq ($(findstring mips,$(ARCH)),)
      ifneq ($(findstring mips64,$(ARCH)),)
        CPU_TYPE ?= mips64
-diff --git a/package/base-files/files/bin/config_generate b/package/base-files/files/bin/config_generate
-index f634f5b0aa..2a0462ea56 100755
---- a/package/base-files/files/bin/config_generate
-+++ b/package/base-files/files/bin/config_generate
-@@ -162,7 +162,7 @@ generate_network() {
- 		static)
- 			local ipad
- 			case "$1" in
--				lan) ipad=${ipaddr:-"192.168.1.1"} ;;
-+				lan) ipad=${ipaddr:-"192.168.6.1"} ;;
- 				*) ipad=${ipaddr:-"192.168.$((addr_offset++)).1"} ;;
- 			esac
- 
 diff --git a/package/emortal/default-settings/Makefile b/package/emortal/default-settings/Makefile
 index 65a6f52a06..0835c3b340 100644
 --- a/package/emortal/default-settings/Makefile
@@ -59,7 +47,7 @@ diff --git a/package/emortal/default-settings/files/99-default-settings b/packag
 index db753461cc..5d9831e696 100755
 --- a/package/emortal/default-settings/files/99-default-settings
 +++ b/package/emortal/default-settings/files/99-default-settings
-@@ -12,9 +12,6 @@ if ! uci -q get system.@imm_init[0].lang > "/dev/null"; then
+@@ -14,9 +14,6 @@ if ! uci -q get system.@imm_init[0].lang > "/dev/null"; then
  	EOF
  fi
  
@@ -68,22 +56,36 @@ index db753461cc..5d9831e696 100755
 -
  ln -sf "/sbin/ip" "/usr/bin/ip"
  
- exit 0
+ case "$DISTRIB_TARGET" in
 diff --git a/package/emortal/default-settings/files/99-default-settings-chinese b/package/emortal/default-settings/files/99-default-settings-chinese
 index d640c6bf02..bd2163d6f5 100755
 --- a/package/emortal/default-settings/files/99-default-settings-chinese
 +++ b/package/emortal/default-settings/files/99-default-settings-chinese
-@@ -9,9 +9,8 @@ if ! uci -q get system.@imm_init[0].system_chn > "/dev/null"; then
- 
+@@ -8,10 +8,9 @@ if ! uci -q get system.@imm_init[0].system_chn > "/dev/null"; then
+		set system.@system[0].zonename="Asia/Shanghai"
+
  		delete system.ntp.server
++		add_list system.ntp.server="ntp.aliyun.com"
  		add_list system.ntp.server="ntp.tencent.com"
 -		add_list system.ntp.server="ntp1.aliyun.com"
-+		add_list system.ntp.server="ntp.aliyun.com"
  		add_list system.ntp.server="ntp.ntsc.ac.cn"
 -		add_list system.ntp.server="cn.ntp.org.cn"
  
  		set system.@imm_init[0].system_chn="1"
  		commit system
+diff --git a/package/kernel/linux/files/sysctl-nf-conntrack.conf b/package/kernel/linux/files/sysctl-nf-conntrack.conf
+index 4dbf6cb572..edb27ff307 100644
+--- a/package/kernel/linux/files/sysctl-nf-conntrack.conf
++++ b/package/kernel/linux/files/sysctl-nf-conntrack.conf
+@@ -3,7 +3,7 @@
+
+ net.netfilter.nf_conntrack_acct=1
+ net.netfilter.nf_conntrack_checksum=0
+-net.netfilter.nf_conntrack_tcp_timeout_established=7440
++net.netfilter.nf_conntrack_tcp_timeout_established=43200
+ net.netfilter.nf_conntrack_udp_timeout=60
+ net.netfilter.nf_conntrack_udp_timeout_stream=180
+ net.netfilter.nf_conntrack_helper=1
 diff --git a/package/utils/busybox/Config-defaults.in b/package/utils/busybox/Config-defaults.in
 index 0552ee7e77..78c3e845b3 100644
 --- a/package/utils/busybox/Config-defaults.in

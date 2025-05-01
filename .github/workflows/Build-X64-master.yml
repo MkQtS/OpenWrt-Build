@@ -94,7 +94,6 @@ jobs:
       continue-on-error: true
       run: |
         cd ${OPENWRT_PATH}
-        git am ${MAIN_PATH}/patches/fix-LuCi-DefaultString.patch
         git am ${MAIN_PATH}/patches/myModifications.patch
 
     - name: Custom argon wallpaper
