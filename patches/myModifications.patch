@@ -62,8 +62,8 @@ index d640c6bf02..bd2163d6f5 100755
 --- a/package/emortal/default-settings/files/99-default-settings-chinese
 +++ b/package/emortal/default-settings/files/99-default-settings-chinese
 @@ -8,10 +8,9 @@ if ! uci -q get system.@imm_init[0].system_chn > "/dev/null"; then
-		set system.@system[0].zonename="Asia/Shanghai"
-
+ 		set system.@system[0].zonename="Asia/Shanghai"
+ 
  		delete system.ntp.server
 +		add_list system.ntp.server="ntp.aliyun.com"
  		add_list system.ntp.server="ntp.tencent.com"
@@ -78,7 +78,7 @@ index 4dbf6cb572..edb27ff307 100644
 --- a/package/kernel/linux/files/sysctl-nf-conntrack.conf
 +++ b/package/kernel/linux/files/sysctl-nf-conntrack.conf
 @@ -3,7 +3,7 @@
-
+ 
  net.netfilter.nf_conntrack_acct=1
  net.netfilter.nf_conntrack_checksum=0
 -net.netfilter.nf_conntrack_tcp_timeout_established=7440
@@ -90,7 +90,7 @@ diff --git a/package/utils/busybox/Config-defaults.in b/package/utils/busybox/Co
 index 0552ee7e77..78c3e845b3 100644
 --- a/package/utils/busybox/Config-defaults.in
 +++ b/package/utils/busybox/Config-defaults.in
-@@ -898,7 +898,7 @@ config BUSYBOX_DEFAULT_UNIQ
+@@ -901,7 +901,7 @@ config BUSYBOX_DEFAULT_UNIQ
  	default y
  config BUSYBOX_DEFAULT_UNLINK
  	bool
@@ -99,7 +99,7 @@ index 0552ee7e77..78c3e845b3 100644
  config BUSYBOX_DEFAULT_USLEEP
  	bool
  	default n
-@@ -2200,7 +2200,7 @@ config BUSYBOX_DEFAULT_TIME
+@@ -2209,7 +2209,7 @@ config BUSYBOX_DEFAULT_TIME
  	default y
  config BUSYBOX_DEFAULT_TREE
  	bool
